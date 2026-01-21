@@ -1749,6 +1749,149 @@
             }
         }
     </style>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/listenfreely.png">
+    <meta name="theme-color" content="#000000">
+    <script defer>
+        // PWA install banner + service worker registration + auto-update
+        (function(){
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+            // Create a simple install banner element (only shown in browser, not when PWA is installed)
+            let deferredPrompt = null;
+            function createInstallBanner() {
+                const existing = document.getElementById('install-banner');
+                if (existing) return existing;
+                const banner = document.createElement('div');
+                banner.id = 'install-banner';
+                banner.style.position = 'fixed';
+                banner.style.left = '12px';
+                banner.style.right = '12px';
+                banner.style.bottom = '84px';
+                banner.style.zIndex = 2000;
+                banner.style.background = '#0a0a0a';
+                banner.style.border = '1px solid #1a1a1a';
+                banner.style.padding = '12px';
+                banner.style.borderRadius = '10px';
+                banner.style.display = 'flex';
+                banner.style.gap = '8px';
+                banner.style.alignItems = 'center';
+                banner.style.justifyContent = 'space-between';
+                banner.style.boxShadow = '0 6px 18px rgba(0,0,0,0.6)';
+
+                const left = document.createElement('div');
+                left.style.display = 'flex';
+                left.style.alignItems = 'center';
+                left.style.gap = '12px';
+
+                const img = document.createElement('img');
+                img.src = '/listenfreely.png';
+                img.style.width = '48px';
+                img.style.height = '48px';
+                img.style.borderRadius = '8px';
+                left.appendChild(img);
+
+                const text = document.createElement('div');
+                text.style.flex = '1';
+                text.style.color = '#fafafa';
+                text.innerHTML = '<div style="font-weight:600">Install ListenFreely</div><div style="font-size:12px;color:#888;margin-top:2px">Open quickly from your home screen and keep it updated</div>';
+                left.appendChild(text);
+
+                const actions = document.createElement('div');
+
+                const installBtn = document.createElement('button');
+                installBtn.innerText = 'Install';
+                installBtn.style.marginRight = '8px';
+                installBtn.className = 'btn btn-primary btn-small';
+                installBtn.onclick = async () => {
+                    if (!deferredPrompt) return;
+                    deferredPrompt.prompt();
+                    const choice = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                    hideBanner();
+                };
+
+                const openBtn = document.createElement('button');
+                openBtn.innerText = 'Open in App';
+                openBtn.className = 'btn btn-secondary btn-small';
+                openBtn.onclick = () => {
+                    // If PWA is installed this will be a no-op; otherwise suggest reload
+                    hideBanner();
+                    try { window.location.href = window.location.href; } catch(e){}
+                };
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.innerText = 'Cancel';
+                cancelBtn.className = 'btn btn-small';
+                cancelBtn.onclick = hideBanner;
+
+                actions.appendChild(installBtn);
+                actions.appendChild(openBtn);
+                actions.appendChild(cancelBtn);
+
+                banner.appendChild(left);
+                banner.appendChild(actions);
+                document.body.appendChild(banner);
+                return banner;
+            }
+
+            function showBanner() {
+                if (isStandalone) return;
+                const b = createInstallBanner();
+                b.style.display = 'flex';
+            }
+            function hideBanner() {
+                const b = document.getElementById('install-banner');
+                if (!b) return;
+                b.style.display = 'none';
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevent automatic mini-infobar on mobile
+                e.preventDefault();
+                deferredPrompt = e;
+                showBanner();
+            });
+
+            // Don't show install UI when already running as PWA
+            if (isStandalone) hideBanner();
+
+            // Register Service Worker and enable immediate updates
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', async () => {
+                    try {
+                        const registration = await navigator.serviceWorker.register('/service-worker.js', {scope:'/'});
+
+                        // If there's an updated worker waiting, ask it to skipWaiting immediately
+                        if (registration.waiting) {
+                            registration.waiting.postMessage({type: 'SKIP_WAITING'});
+                        }
+
+                        // Listen for updates found in the future
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            if (!newWorker) return;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed') {
+                                    // New content available — activate immediately
+                                    if (navigator.serviceWorker.controller) {
+                                        newWorker.postMessage({type: 'SKIP_WAITING'});
+                                    }
+                                }
+                            });
+                        });
+
+                        // When the new service worker takes control, reload so user sees updated app
+                        navigator.serviceWorker.addEventListener('controllerchange', () => {
+                            window.location.reload();
+                        });
+                    } catch (err) {
+                        console.error('ServiceWorker registration failed:', err);
+                    }
+                });
+            }
+        })();
+    </script>
 </head>
 
 <body>

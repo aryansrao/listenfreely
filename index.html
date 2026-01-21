@@ -1636,8 +1636,8 @@
                 height: 3px;
             }
 
-            .blend-info {
-                gap: 10px;
+            .blend-top-bar {
+                padding: 12px;
             }
 
             .blend-avatar {
@@ -1668,88 +1668,690 @@
                 font-size: 10px;
             }
 
+            .now-playing-section,
+            .queue-section-blend,
+            .blend-search-section {
+                padding: 12px;
+                margin: 0 12px 12px;
+            }
+
+            .section-label {
+                font-size: 10px;
+                margin-bottom: 8px;
+            }
+
             .now-playing-cover {
                 width: 48px;
                 height: 48px;
             }
 
+            .now-playing-title {
+                font-size: 13px;
+            }
+
+            .now-playing-artist {
+                font-size: 11px;
+            }
+
             .queue-item-blend {
                 padding: 6px;
+                gap: 6px;
+                margin-bottom: 6px;
+            }
+
+            .queue-item-cover {
+                width: 36px;
+                height: 36px;
+            }
+
+            .queue-item-title {
+                font-size: 12px;
+            }
+
+            .queue-item-artist {
+                font-size: 11px;
+            }
+
+            .drag-handle svg {
+                width: 14px;
+                height: 14px;
+            }
+
+            .blend-search-bar {
+                padding: 10px 12px;
+                margin-bottom: 12px;
+            }
+
+            .blend-search-input {
+                font-size: 13px;
+            }
+
+            .blend-search-results {
+                max-height: 250px;
+            }
+
+            .modal-content {
+                padding: 18px;
+                max-width: 92%;
+            }
+
+            /* Small-screen tweaks for Blend mode */
+            .blend-container {
+                padding: 0 10px;
+            }
+
+            .blend-top-bar,
+            .now-playing-section,
+            .queue-section-blend,
+            .blend-search-section {
+                margin: 0 8px 12px 8px;
+                padding: 10px 12px;
+                border-radius: 8px;
+                background: #0a0a0a;
+                border: 1px solid #1a1a1a;
+                box-sizing: border-box;
+            }
+
+            .blend-top-bar .blend-avatar {
+                width: 44px;
+                height: 44px;
+            }
+
+            .blend-top-bar .blend-details {
+                min-width: 0;
+            }
+
+            /* Make Coming Next list items full-width and responsive */
+            .queue-section-blend .queue-item-blend {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .queue-section-blend .queue-item-cover {
+                width: 56px;
+                height: 56px;
+                flex-shrink: 0;
+            }
+
+            .queue-section-blend .queue-item-info {
+                min-width: 0;
+                flex: 1 1 auto;
+                overflow: hidden;
+            }
+
+            .queue-section-blend .drag-handle {
+                flex-shrink: 0;
+                margin-right: 6px;
+            }
+
+            .modal-header {
+                font-size: 15px;
+                margin-bottom: 14px;
+            }
+
+            .form-label {
+                font-size: 11px;
+                margin-bottom: 5px;
+            }
+
+            .form-input {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+
+            .btn {
+                padding: 8px;
+                font-size: 12px;
+            }
+
+            .api-section {
+                margin-bottom: 20px;
+            }
+
+            .api-header {
+                padding-bottom: 6px;
+                margin-bottom: 10px;
+            }
+
+            .api-name {
+                font-size: 12px;
+            }
+
+            .api-count {
+                font-size: 10px;
+            }
+
+            .empty-state,
+            .empty-queue {
+                padding: 30px 12px;
+            }
+
+            .empty-state svg,
+            .empty-queue svg {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 10px;
+            }
+
+            .empty-state p,
+            .empty-queue p {
+                font-size: 13px;
+            }
+        }
+
+        /* Small Mobile */
+        @media (max-width: 360px) {
+            .mobile-logo {
+                font-size: 22px;
+                padding: 12px 14px;
+            }
+
+            .sidebar {
+                bottom: 0;
+                padding: 8px 0;
+            }
+
+            nav {
+                padding: 0 6px;
+            }
+
+            .nav-item {
+                padding: 7px 3px;
+                gap: 4px;
+            }
+
+            .nav-item span {
+                font-size: 9px;
+            }
+
+            .nav-item svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            .main {
+                padding-bottom: 230px;
+            }
+
+            .search-bar {
+                padding: 8px 14px;
+                margin: 10px 10px;
+            }
+
+            #searchResults,
+            .tracks-grid {
+                padding: 0 10px;
+            }
+
+            .section-title {
+                padding: 0 10px;
+            }
+
+            .track-card {
+                padding: 6px;
+                gap: 8px;
+            }
+
+            .track-cover,
+            .queue-item-cover {
+                width: 40px;
+                height: 40px;
+            }
+
+            .track-title {
+                font-size: 12px;
+            }
+
+            .track-subtitle {
+                font-size: 11px;
+            }
+
+            .track-actions {
+                gap: 4px;
+            }
+
+            .icon-btn {
+                padding: 4px;
+            }
+
+            .icon-btn svg {
+                width: 14px;
+                height: 14px;
+            }
+
+            .player-bar {
+                padding: 8px 10px 10px;
+                bottom: 60px;
+            }
+
+            .player-content {
+                gap: 8px;
+            }
+
+            .player-track {
+                gap: 6px;
+            }
+
+            .player-cover {
+                width: 32px;
+                height: 32px;
+            }
+
+            .player-title {
+                font-size: 11px;
+            }
+
+            .player-artist {
+                font-size: 9px;
+            }
+
+            .source-badge {
+                display: none;
+            }
+
+            .controls-buttons {
+                gap: 10px;
+            }
+
+            .control-button svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .control-button.play-btn {
+                width: 34px;
+                height: 34px;
+            }
+
+            .control-button.play-btn svg {
+                width: 14px;
+                height: 14px;
+            }
+
+            .time-label {
+                font-size: 8px;
+                min-width: 24px;
+            }
+
+            .progress-track {
+                height: 3px;
+            }
+
+            .blend-top-bar {
+                padding: 12px;
+            }
+
+            .blend-avatar {
+                width: 36px;
+                height: 36px;
+            }
+
+            .blend-avatar svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .blend-name {
+                font-size: 13px;
+            }
+
+            .blend-participants-count {
+                font-size: 10px;
+            }
+
+            .blend-actions-bar {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .btn-small {
+                padding: 4px 8px;
+                font-size: 10px;
             }
 
             .now-playing-section,
             .queue-section-blend,
             .blend-search-section {
-                margin: 0 10px 12px;
+                padding: 12px;
+                margin: 0 12px 12px;
+            }
+
+            .section-label {
+                font-size: 10px;
+                margin-bottom: 8px;
+            }
+
+            .now-playing-cover {
+                width: 48px;
+                height: 48px;
+            }
+
+            .now-playing-title {
+                font-size: 13px;
+            }
+
+            .now-playing-artist {
+                font-size: 11px;
+            }
+
+            .queue-item-blend {
+                padding: 6px;
+                gap: 6px;
+                margin-bottom: 6px;
+            }
+
+            .queue-item-cover {
+                width: 36px;
+                height: 36px;
+            }
+
+            .queue-item-title {
+                font-size: 12px;
+            }
+
+            .queue-item-artist {
+                font-size: 11px;
+            }
+
+            .drag-handle svg {
+                width: 14px;
+                height: 14px;
+            }
+
+            .blend-search-bar {
+                padding: 10px 12px;
+                margin-bottom: 12px;
+            }
+
+            .blend-search-input {
+                font-size: 13px;
+            }
+
+            .blend-search-results {
+                max-height: 250px;
             }
 
             .modal-content {
-                padding: 16px;
+                padding: 18px;
+                max-width: 92%;
+            }
+
+            /* Small-screen tweaks for Blend mode */
+            .blend-container {
+                padding: 0 10px;
+            }
+
+            .blend-top-bar,
+            .now-playing-section,
+            .queue-section-blend,
+            .blend-search-section {
+                margin: 0 8px 12px 8px;
+                padding: 10px 12px;
+                border-radius: 8px;
+                background: #0a0a0a;
+                border: 1px solid #1a1a1a;
+                box-sizing: border-box;
+            }
+
+            .blend-top-bar .blend-avatar {
+                width: 44px;
+                height: 44px;
+            }
+
+            .blend-top-bar .blend-details {
+                min-width: 0;
+            }
+
+            /* Make Coming Next list items full-width and responsive */
+            .queue-section-blend .queue-item-blend {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .queue-section-blend .queue-item-cover {
+                width: 56px;
+                height: 56px;
+                flex-shrink: 0;
+            }
+
+            .queue-section-blend .queue-item-info {
+                min-width: 0;
+                flex: 1 1 auto;
+                overflow: hidden;
+            }
+
+            .queue-section-blend .drag-handle {
+                flex-shrink: 0;
+                margin-right: 6px;
             }
 
             .modal-header {
-                font-size: 14px;
+                font-size: 15px;
+                margin-bottom: 14px;
             }
 
-            .form-input,
-            .blend-search-input {
+            .form-label {
+                font-size: 11px;
+                margin-bottom: 5px;
+            }
+
+            .form-input {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+
+            .btn {
+                padding: 8px;
                 font-size: 12px;
             }
-        }
 
-        /* Touch optimization for all mobile devices */
-        @media (hover: none) and (pointer: coarse) {
-
-            .nav-item,
-            .track-card,
-            .icon-btn,
-            .control-button,
-            .btn {
-                -webkit-tap-highlight-color: transparent;
-                touch-action: manipulation;
-                user-select: none;
-                -webkit-user-select: none;
+            .api-section {
+                margin-bottom: 20px;
             }
 
-            .track-card:active {
-                background: #0f0f0f;
-                transform: scale(0.98);
+            .api-header {
+                padding-bottom: 6px;
+                margin-bottom: 10px;
             }
 
-            .icon-btn:active,
-            .control-button:active {
-                transform: scale(0.9);
+            .api-name {
+                font-size: 12px;
             }
 
-            .btn:active {
-                transform: scale(0.98);
+            .api-count {
+                font-size: 10px;
             }
 
-            .progress-track {
-                height: 10px;
-                cursor: pointer;
-                touch-action: none;
+            .empty-state,
+            .empty-queue {
+                padding: 30px 12px;
             }
 
-            .progress-bar {
-                pointer-events: none;
+            .empty-state svg,
+            .empty-queue svg {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 10px;
+            }
+
+            .empty-state p,
+            .empty-queue p {
+                font-size: 13px;
             }
         }
 
+        /* Install banner styles (responsive) */
+        #install-banner {
+            position: fixed;
+            left: 12px;
+            right: 12px;
+            bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+            z-index: 2000;
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            max-width: 820px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            color: #fafafa;
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        #install-banner .install-left {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        #install-banner .install-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex: 0 0 auto;
+        }
+
+        #install-banner .install-text {
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        #install-banner .install-text > div:first-child {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        #install-banner .install-text > div:nth-child(2) {
+            color: #9a9a9a;
+            font-size: 12px;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #install-banner .install-actions {
+            display: flex;
+            gap: 8px;
+            flex: 0 0 auto;
+            align-items: center;
+        }
+
+        .install-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .install-primary { background: #fafafa; color: #000; }
+        .install-secondary { background: transparent; color: #fafafa; border: 1px solid rgba(255,255,255,0.06); }
+        .install-cancel { background: transparent; color: #9a9a9a; }
+
+        /* Responsive: stack on narrow screens */
+        @media (max-width: 520px) {
+            #install-banner { flex-direction: column; align-items: stretch; padding: 12px; }
+            #install-banner .install-left { gap: 10px; }
+            #install-banner .install-actions { flex-direction: column; gap: 8px; margin-top: 8px; }
+            .install-btn { width: 100%; }
+            #install-banner .install-icon { width: 48px; height: 48px; }
+        }
+        /* Home credits */
+        .home-credit { margin: 18px 0 36px; color: #9a9a9a; font-size: 13px; max-width: 1200px; }
+        .home-credit a { color: #fafafa; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 1px; }
+        .home-credit a:hover { color: #fff; text-decoration: underline; }
+        @media (max-width:480px) {
+            .home-credit { margin: 12px 8px 28px; font-size: 13px; }
+        }
+
+        /* Imported grids from new.html (desktop mosaic + responsive rules) */
+        .extra-bento-section { width:100%; max-width:1400px; margin:18px auto 0; }
+        .extra-bento-grid {
+            display: grid;
+            /* use fewer columns on desktop so each tile is larger/square-ish for album art */
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            width: 100%;
+            box-sizing: border-box;
+            max-width: 1400px;
+            margin: 0 auto;
+            /* taller rows so square artwork isn't squeezed; will be spanned for large tiles */
+            grid-auto-rows: 220px;
+        }
+
+        .extra-bento-item {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.24s ease, box-shadow 0.24s ease;
+            position: relative;
+            height: 100%;
+            display: block;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+        }
+
+        .extra-bento-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .extra-bento-item .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 18px;
+            background: linear-gradient(to top, rgba(0,0,0,0.92), transparent);
+            box-sizing: border-box;
+        }
+
+        .extra-bento-item .title { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #fff; }
+        .extra-bento-item .subtitle { font-size: 14px; color: #cfcfcf; }
+
+        /* spanning rules to match new.html mosaic */
+        .extra-bento-item.large { grid-column: span 2; grid-row: span 2; }
+        .extra-bento-item.wide { grid-column: span 2; }
+        .extra-bento-item.tall { grid-row: span 2; }
+
+        @media (max-width: 1024px) {
+            .extra-bento-grid { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 140px; }
+        }
+
+        @media (max-width: 768px) {
+            .extra-bento-grid { grid-template-columns: repeat(6, 1fr); gap:12px; grid-auto-rows: 100px; }
+            .extra-bento-item { height: auto; }
+            .extra-bento-item.large { grid-column: span 6; grid-row: span 1; }
+            .extra-bento-item.wide { grid-column: span 4; }
+            .extra-bento-item.tall { grid-column: span 2; grid-row: span 2; }
+        }
 
         @media (max-width: 480px) {
-            .player-bar {
-                bottom: calc(65px + env(safe-area-inset-bottom, 0px));
-            }
+            /* Responsive auto-fit grid: fills rows and avoids empty column gaps */
+            .extra-bento-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px; grid-auto-rows: auto; }
+            .extra-bento-item { aspect-ratio: 1 / 1; min-height: 110px; }
+            /* Make large tiles span the full row regardless of column count */
+            .extra-bento-item.large { grid-column: 1 / -1; grid-row: span 1; }
+            .extra-bento-item.wide { grid-column: span 2; }
+            .extra-bento-item.tall { grid-row: span 2; grid-column: span 1; }
         }
 
-        @media (max-width: 360px) {
-            .player-bar {
-                bottom: calc(60px + env(safe-area-inset-bottom, 0px));
-            }
-        }
-    </style>
-    <style>
         /* Now-playing overlay: */
         #nowPlayingOverlay {
             position: fixed;
@@ -1862,8 +2464,47 @@
             #nowPlayingOverlay .overlay-progress .bar { height: 100%; border-radius: 8px; }
             #nowPlayingOverlay .overlay-times { width: calc(100% - 40px); }
         }
-    </style>
-    <style>
+        /* Home view greeting */
+        /* Left-align Home content on desktop so tiles sit to the left column */
+        #homeView { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; padding: 40px 20px; color: #fafafa; }
+        .home-greeting { font-size: 44px; font-weight: 800; margin-bottom: 8px; text-align: left; width: 100%; }
+        @media (max-width:720px) {
+            /* left-align and reduce padding/font-size on phones */
+            #homeView { align-items: flex-start; padding-top: 20px; padding-left: 18px; padding-right: 18px; }
+            .home-greeting { font-size: 28px; text-align: left; margin-bottom: 6px; }
+        }
+        @media (max-width:480px) {
+            /* Tighter mobile layout: smaller greeting and compact action tiles */
+            .home-greeting { font-size: 24px; margin-left: 4px; margin-bottom: 10px; }
+            /* Keep top action tiles in their original horizontal layout on phones */
+            .home-bento { grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: calc(100% - 32px); }
+            .bento-tile {
+                padding: 10px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .bento-img { width:48px; height:48px; margin-bottom:0; }
+            .bento-label { font-size: 14px; }
+
+            /* Extra grids compact: styles consolidated earlier to avoid duplicates */
+
+            /* prevent large artwork from pushing too far on phones */
+            #nowPlayingOverlay .overlay-cover { max-height: 40vh; width: 100%; }
+        }
+        /* Bento grid: show 4 action tiles on desktop */
+        .home-bento { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: 100%; max-width: 1200px; margin-top: 18px; }
+        .bento-tile { background: rgba(255,255,255,0.02); border-radius: 12px; padding: 12px; display:flex; align-items:center; gap:12px; cursor:pointer; transition: transform .12s ease, background .12s ease; }
+        .bento-tile:hover { transform: translateY(-4px); background: rgba(255,255,255,0.03); }
+        .bento-img { width:64px; height:64px; object-fit:cover; border-radius:8px; flex:0 0 auto; }
+        .bento-label { font-size:16px; font-weight:700; }
+        @media (max-width:720px) {
+            .home-bento { grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px; }
+            .bento-img { width:56px; height:56px; }
+            .bento-label { font-size:14px; }
+        }
+
         /* Install banner styles (responsive) */
         #install-banner {
             position: fixed;
@@ -2073,7 +2714,13 @@
         <aside class="sidebar">
             <div class="logo">ListenFreely</div>
             <nav>
-                <div class="nav-item active" data-view="search">
+                <div class="nav-item active" data-view="home">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41M7 12a5 5 0 1010 0 5 5 0 00-10 0z"/>
+                    </svg>
+                    <span>Home</span>
+                </div>
+                <div class="nav-item" data-view="search">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -2105,6 +2752,33 @@
         </aside>
 
         <main class="main" id="mainContent">
+            <div id="homeView" style="display:none;">
+                <div class="home-greeting" id="homeGreeting">Good day</div>
+                <div class="home-bento" id="homeBento">
+                    <div class="bento-tile" data-target="mostPlayed">
+                        <img class="bento-img" src="/listenfreely.png" alt="Most Played">
+                        <div class="bento-label">Most Played</div>
+                    </div>
+                    <div class="bento-tile" data-target="liked">
+                        <img class="bento-img" src="/listenfreely.png" alt="Liked Songs">
+                        <div class="bento-label">Liked Songs</div>
+                    </div>
+                    <div class="bento-tile" data-target="recent">
+                        <img class="bento-img" src="/listenfreely.png" alt="Recently Played">
+                        <div class="bento-label">Recently Played</div>
+                    </div>
+                    <div class="bento-tile" data-target="blend">
+                        <img class="bento-img" src="/listenfreely.png" alt="Blend">
+                        <div class="bento-label">Listen Together</div>
+                    </div>
+                </div>
+                <!-- Imported grids from new.html -->
+                <div class="extra-bento-section" id="extraBentoSection" style="width:100%; max-width:1400px; margin-top:20px;">
+                    <div class="extra-bento-grid" id="extraBentoGrid"></div>
+                </div>
+                <div class="home-credit" id="homeCredit" aria-label="Credits">Created by <a href="https://aryansrao.github.io" target="_blank" rel="noopener noreferrer">Aryan S Rao</a> — <a href="https://github.com/aryansrao/listenfreely" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="https://aryansrao.github.io/support/" target="_blank" rel="noopener noreferrer">Support Me</a></div>
+            </div>
+
             <div id="searchView">
                 <div class="search-bar">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2347,7 +3021,7 @@
             allTracks: [],
             currentIndex: -1,
             isPlaying: false,
-            currentView: 'search',
+            currentView: 'home',
             loopState: localStorage.getItem('loopState') || 'none',
             recentTracks: JSON.parse(localStorage.getItem('recentTracks') || '[]'),
             likedTracks: JSON.parse(localStorage.getItem('likedTracks') || '[]'),
@@ -2362,6 +3036,277 @@
                 participants: []
             }
         };
+
+        // Daily most-played tracking (stored per-day in localStorage)
+        function getTodayKey() {
+            const d = new Date();
+            return d.toISOString().slice(0,10); // YYYY-MM-DD
+        }
+
+        function loadDailyMostPlayed() {
+            try {
+                const key = 'dailyMostPlayed-' + getTodayKey();
+                const raw = localStorage.getItem(key);
+                state.mostPlayedDaily = raw ? JSON.parse(raw) : null;
+            } catch (e) {
+                console.warn('Could not load daily most played', e);
+                state.mostPlayedDaily = null;
+            }
+        }
+
+        function saveDailyMostPlayed(track) {
+            try {
+                const key = 'dailyMostPlayed-' + getTodayKey();
+                localStorage.setItem(key, JSON.stringify(track));
+                state.mostPlayedDaily = track;
+            } catch (e) { console.warn('Could not save daily mostPlayed', e); }
+        }
+
+        function computeDailyMostPlayed() {
+            try {
+                const dateKey = getTodayKey();
+                const countsKey = 'playCounts-' + dateKey;
+                const metaKey = 'playCountsMeta-' + dateKey;
+                const counts = JSON.parse(localStorage.getItem(countsKey) || '{}');
+                const meta = JSON.parse(localStorage.getItem(metaKey) || '{}');
+                let maxId = null, maxCount = 0;
+                for (const id in counts) {
+                    const c = counts[id] || 0;
+                    if (c > maxCount) { maxCount = c; maxId = id; }
+                }
+                if (maxId && meta[maxId]) {
+                    const t = Object.assign({}, meta[maxId]);
+                    const yr = new Date().getFullYear();
+                    t.subtitle = `Your most listened in ${yr}`;
+                    saveDailyMostPlayed(t);
+                }
+            } catch (e) { console.warn('computeDailyMostPlayed failed', e); }
+        }
+
+        function incrementPlayCount(track) {
+            try {
+                const dateKey = getTodayKey();
+                const countsKey = 'playCounts-' + dateKey;
+                const metaKey = 'playCountsMeta-' + dateKey;
+                const counts = JSON.parse(localStorage.getItem(countsKey) || '{}');
+                const meta = JSON.parse(localStorage.getItem(metaKey) || '{}');
+                const id = track.id || (track.downloadUrl || '') + '::' + (track.name || 'unknown');
+                counts[id] = (counts[id] || 0) + 1;
+                meta[id] = { id: id, name: track.name || 'Unknown', artists: track.artists || '', cover: track.cover || '', downloadUrl: track.downloadUrl || '' };
+                localStorage.setItem(countsKey, JSON.stringify(counts));
+                localStorage.setItem(metaKey, JSON.stringify(meta));
+                // recompute winner and update UI
+                computeDailyMostPlayed();
+                // also update yearly aggregation for the current year so the "Most listened in YEAR" tile stays fresh
+                try { computeYearlyMostPlayed(new Date().getFullYear()); } catch (e) {}
+                try { renderExtraGrids(); } catch (e) {}
+                try { renderHomeView(); } catch (e) {}
+            } catch (e) { console.warn('incrementPlayCount failed', e); }
+        }
+
+        // load today's cached most-played at startup
+        loadDailyMostPlayed();
+        // load cached yearly most-played for current year
+        try { loadYearlyMostPlayed(new Date().getFullYear()); } catch (e) {}
+        // load liked-play aggregation (global most-loved)
+        try { loadMostPlayedLiked(); } catch (e) {}
+
+        // Return a simple SVG music-note data URL used as a neutral fallback when no cover exists
+        function generateMusicIconDataUrl() {
+            const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23bfbfbf' stroke-width='1.6'><path d='M9 19V6l10-3v13'/><circle cx='6' cy='18' r='2'/><circle cx='18' cy='16' r='2'/></svg>`;
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+
+        function saveYearlyMostPlayed(track, year) {
+            try {
+                const key = 'yearlyMostPlayed-' + year;
+                localStorage.setItem(key, JSON.stringify(track));
+                state.mostPlayedYear = track;
+            } catch (e) { console.warn('Could not save yearly mostPlayed', e); }
+        }
+
+        function loadYearlyMostPlayed(year) {
+            try {
+                const key = 'yearlyMostPlayed-' + year;
+                const raw = localStorage.getItem(key);
+                if (raw) state.mostPlayedYear = JSON.parse(raw);
+                else computeYearlyMostPlayed(year);
+            } catch (e) { console.warn('Could not load yearly most played', e); state.mostPlayedYear = null; }
+        }
+
+        function computeYearlyMostPlayed(year) {
+            try {
+                // iterate all per-day counts and aggregate those within the given year
+                const prefix = 'playCounts-';
+                const metaPrefix = 'playCountsMeta-';
+                const totals = {};
+                const metas = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (!key || !key.startsWith(prefix)) continue;
+                    const datePart = key.slice(prefix.length); // YYYY-MM-DD
+                    if (!datePart.startsWith(String(year))) continue;
+                    const counts = JSON.parse(localStorage.getItem(key) || '{}');
+                    const meta = JSON.parse(localStorage.getItem(metaPrefix + datePart) || '{}');
+                    for (const id in counts) {
+                        totals[id] = (totals[id] || 0) + (counts[id] || 0);
+                        if (meta[id]) metas[id] = meta[id];
+                    }
+                }
+
+                // exclude tracks that are already in the liked list
+                const likedIds = new Set((state.likedTracks || []).map(t => t.id));
+                let maxId = null, maxCount = 0;
+                for (const id in totals) {
+                    if (likedIds.has(id)) continue; // skip liked tracks
+                    const c = totals[id] || 0;
+                    if (c > maxCount) { maxCount = c; maxId = id; }
+                }
+
+                if (maxId && metas[maxId]) {
+                    const t = Object.assign({}, metas[maxId]);
+                    t.subtitle = `Your most listened in ${year}`;
+                    saveYearlyMostPlayed(t, year);
+                } else {
+                    // no data for year
+                    state.mostPlayedYear = null;
+                }
+            } catch (e) { console.warn('computeYearlyMostPlayed failed', e); }
+        }
+
+        // ---- liked-track global counting (no daily checks) ----
+        function incrementLikedPlayCount(track) {
+            try {
+                if (!track || !track.id) return;
+                if (!isLiked(track.id)) return; // only track plays for liked songs
+
+                const key = 'likedPlayCounts';
+                const metaKey = 'likedPlayMeta';
+                const counts = JSON.parse(localStorage.getItem(key) || '{}');
+                const meta = JSON.parse(localStorage.getItem(metaKey) || '{}');
+                counts[track.id] = (counts[track.id] || 0) + 1;
+                meta[track.id] = { id: track.id, name: track.name || 'Unknown', artists: track.artists || '', cover: track.cover || '', downloadUrl: track.downloadUrl || '' };
+                localStorage.setItem(key, JSON.stringify(counts));
+                localStorage.setItem(metaKey, JSON.stringify(meta));
+
+                // recompute and update UI
+                computeMostPlayedLiked();
+                try { renderExtraGrids(); } catch (e) {}
+            } catch (e) { console.warn('incrementLikedPlayCount failed', e); }
+        }
+
+        function computeMostPlayedLiked() {
+            try {
+                const key = 'likedPlayCounts';
+                const metaKey = 'likedPlayMeta';
+                const counts = JSON.parse(localStorage.getItem(key) || '{}');
+                const meta = JSON.parse(localStorage.getItem(metaKey) || '{}');
+                let maxId = null, maxCount = 0;
+                // if there are explicit liked-play counts, use them
+                for (const id in counts) {
+                    const c = counts[id] || 0;
+                    if (c > maxCount) { maxCount = c; maxId = id; }
+                }
+
+                // if none found, fall back to aggregating daily playCounts and picking the top among liked tracks
+                if (!maxId || maxCount === 0) {
+                    const prefix = 'playCounts-';
+                    const agg = {};
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (!k || !k.startsWith(prefix)) continue;
+                        try {
+                            const dayCounts = JSON.parse(localStorage.getItem(k) || '{}');
+                            for (const id in dayCounts) agg[id] = (agg[id] || 0) + (dayCounts[id] || 0);
+                        } catch (e) {}
+                    }
+                    // prefer only tracks that are in likedTracks
+                    const likedIds = new Set((state.likedTracks || []).map(t => t.id));
+                    for (const id in agg) {
+                        if (likedIds.size > 0 && !likedIds.has(id)) continue;
+                        const c = agg[id] || 0;
+                        if (c > maxCount) { maxCount = c; maxId = id; }
+                    }
+                    // try to populate meta from daily meta keys if needed
+                    if (maxId && !meta[maxId]) {
+                        const metaPrefix = 'playCountsMeta-';
+                        for (let i = 0; i < localStorage.length; i++) {
+                            const k = localStorage.key(i);
+                            if (!k || !k.startsWith(metaPrefix)) continue;
+                            try {
+                                const m = JSON.parse(localStorage.getItem(k) || '{}');
+                                if (m[maxId]) { meta[maxId] = m[maxId]; break; }
+                            } catch (e) {}
+                        }
+                    }
+                }
+
+                if (maxId && meta[maxId]) {
+                    const t = Object.assign({}, meta[maxId]);
+                    t.subtitle = 'Most loved song';
+                    state.mostPlayedLiked = t;
+                } else {
+                    state.mostPlayedLiked = null;
+                }
+            } catch (e) { console.warn('computeMostPlayedLiked failed', e); state.mostPlayedLiked = null; }
+        }
+
+        // Aggregate all playCounts (across all days) and return sorted list [{id,count,meta}]
+        function getAllPlayCountsSorted() {
+            try {
+                const prefix = 'playCounts-';
+                const metaPrefix = 'playCountsMeta-';
+                const totals = {};
+                const metas = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (!key || !key.startsWith(prefix)) continue;
+                    const datePart = key.slice(prefix.length);
+                    try {
+                        const counts = JSON.parse(localStorage.getItem(key) || '{}');
+                        const meta = JSON.parse(localStorage.getItem(metaPrefix + datePart) || '{}');
+                        for (const id in counts) {
+                            totals[id] = (totals[id] || 0) + (counts[id] || 0);
+                            if (meta[id]) metas[id] = meta[id];
+                        }
+                    } catch (e) { }
+                }
+                const arr = Object.keys(totals).map(id => ({ id, count: totals[id], meta: metas[id] || null }));
+                arr.sort((a, b) => b.count - a.count);
+                return arr;
+            } catch (e) { console.warn('getAllPlayCountsSorted failed', e); return []; }
+        }
+
+        // Pick the "second most repeated" track while skipping any IDs in excludeSet.
+        // We will attempt to take the literal second item (index 1), but if it's excluded,
+        // walk forward until we find a non-excluded item.
+        function findSecondMostRepeatedExcluding(excludeSet) {
+            try {
+                const sorted = getAllPlayCountsSorted();
+                if (!sorted || sorted.length === 0) return null;
+                // prefer literal second-most (index 1), otherwise next non-excluded
+                for (let i = 1; i < sorted.length; i++) {
+                    const id = sorted[i].id;
+                    if (excludeSet && excludeSet.has(id)) continue;
+                    // return a minimal track object
+                    const m = sorted[i].meta || {};
+                    return { id: id, name: m.name || m.title || 'Unknown', artists: m.artists || '', cover: m.cover || '' };
+                }
+                // if no second found, try first (if not excluded)
+                if (sorted.length > 0 && (!excludeSet || !excludeSet.has(sorted[0].id))) {
+                    const m = sorted[0].meta || {};
+                    return { id: sorted[0].id, name: m.name || m.title || 'Unknown', artists: m.artists || '', cover: m.cover || '' };
+                }
+                return null;
+            } catch (e) { console.warn('findSecondMostRepeatedExcluding failed', e); return null; }
+        }
+
+        function loadMostPlayedLiked() {
+            try {
+                // ensure computation is done even if keys are missing
+                computeMostPlayedLiked();
+            } catch (e) { console.warn('loadMostPlayedLiked failed', e); state.mostPlayedLiked = null; }
+        }
 
         let peer = null;
 
@@ -2640,6 +3585,14 @@
                 el.pauseIcon.style.display = 'block';
 
                 addToRecent(state.currentTrack);
+                try {
+                    // increment today's play count for this track
+                    if (state.currentTrack && state.currentTrack.id) {
+                        incrementPlayCount(state.currentTrack);
+                        // also increment liked-play counter (global)
+                        try { incrementLikedPlayCount(state.currentTrack); } catch (e) {}
+                    }
+                } catch (e) { console.warn('incrementPlayCount failed', e); }
 
                 if (state.blend.active) {
                     updateQueueUI();
@@ -2765,6 +3718,151 @@
             }
         });
 
+        // Home view helpers
+        function computeGreeting() {
+            const h = new Date().getHours();
+            if (h >= 5 && h < 12) return 'Good morning';
+            if (h >= 12 && h < 17) return 'Good afternoon';
+            if (h >= 17 && h < 22) return 'Good evening';
+            return 'Good night';
+        }
+
+        function renderHomeView() {
+            const g = computeGreeting();
+            const sub = (g === 'Good night') ? 'Take a rest — we saved your queue' : 'Welcome back — pick something to listen to';
+            const elG = document.getElementById('homeGreeting');
+            if (elG) elG.textContent = g;
+            // populate bento thumbnails (simple, non-critical)
+            const bento = document.getElementById('homeBento');
+            if (bento) {
+                const tiles = Array.from(bento.querySelectorAll('.bento-tile'));
+                tiles.forEach(tile => {
+                    const t = tile.dataset.target;
+                    let img = '/listenfreely.png';
+                    if (t === 'liked' && state.likedTracks && state.likedTracks[0]) img = state.likedTracks[0].cover || img;
+                    if (t === 'recent' && state.recentTracks && state.recentTracks[0]) img = state.recentTracks[0].cover || img;
+                    if (t === 'mostPlayed') {
+                        // prefer yearly winner, then today's winner, then most-loved, then recent as fallback
+                        const winner = state.mostPlayedYear || state.mostPlayedDaily || state.mostPlayedLiked || (state.recentTracks && state.recentTracks[0]) || (state.likedTracks && state.likedTracks[0]);
+                        if (winner && winner.cover) img = winner.cover || img;
+                    }
+                    if (t === 'blend' && state.blend && state.blend.avatar) img = state.blend.avatar || img;
+                    const imgEl = tile.querySelector('.bento-img');
+                    if (imgEl) imgEl.src = img;
+                    // attach click handlers: navigate or play directly for mostPlayed
+                    tile.onclick = async () => {
+                        if (t === 'liked') {
+                            const nav = document.querySelector('.nav-item[data-view="liked"]'); if (nav) nav.click();
+                        } else if (t === 'recent') {
+                            const nav = document.querySelector('.nav-item[data-view="recent"]'); if (nav) nav.click();
+                        } else if (t === 'blend') {
+                            const nav = document.querySelector('.nav-item[data-view="blend"]'); if (nav) nav.click();
+                        } else if (t === 'mostPlayed') {
+                            // Play the computed most-played candidate: prefer yearly, then daily, then most-loved, else fallback
+                            const winner = state.mostPlayedYear || state.mostPlayedDaily || state.mostPlayedLiked;
+                            let candidate = null;
+                            if (winner && winner.id) {
+                                candidate = (state.allTracks || []).find(x => x.id === winner.id) || (state.recentTracks || []).find(x => x.id === winner.id) || (state.likedTracks || []).find(x => x.id === winner.id) || winner;
+                            }
+                            // final fallback to any recent/liked/all track
+                            if (!candidate) candidate = (state.recentTracks && state.recentTracks[0]) || (state.likedTracks && state.likedTracks[0]) || (state.allTracks && state.allTracks[0]);
+                            if (candidate) {
+                                state.playlist = [candidate];
+                                try { await playTrack(0); } catch (e) { console.warn('Failed to play mostPlayed', e); }
+                            } else {
+                                const nav = document.querySelector('.nav-item[data-view="search"]'); if (nav) nav.click();
+                            }
+                        } else {
+                            const nav = document.querySelector('.nav-item[data-view="search"]'); if (nav) nav.click();
+                        }
+                    };
+                });
+                }
+                // render imported extra grids
+                try { renderExtraGrids(); } catch (e) {}
+            }
+        
+
+        // Imported grids generator (from new.html)
+        function renderExtraGrids() {
+            const grid = document.getElementById('extraBentoGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            // Build items dynamically; the first (large) tile is today's most-played if available
+            const year = new Date().getFullYear();
+            const items = [];
+            // prefer the yearly aggregated winner for the large tile; fall back to today's winner, then to a neutral placeholder
+            if (state.mostPlayedYear && state.mostPlayedYear.id) {
+                items.push({ title: state.mostPlayedYear.name || `Most listened in ${year}`, subtitle: state.mostPlayedYear.subtitle || `Your most listened in ${year}`, size: 'large', artist: state.mostPlayedYear.artists || '', cover: state.mostPlayedYear.cover, id: state.mostPlayedYear.id });
+            } else if (state.mostPlayedDaily && state.mostPlayedDaily.id) {
+                items.push({ title: state.mostPlayedDaily.name || 'Most Played', subtitle: state.mostPlayedDaily.subtitle || `Your most listened in ${year}`, size: 'large', artist: state.mostPlayedDaily.artists || '', cover: state.mostPlayedDaily.cover, id: state.mostPlayedDaily.id });
+            } else {
+                items.push({ title: `Most listened in ${year}`, subtitle: `No data for ${year}`, size: 'large' });
+            }
+            // fallback tiles: prefer most-played liked song, otherwise a neutral placeholder
+            if (state.mostPlayedLiked && state.mostPlayedLiked.id) {
+                items.push({ title: state.mostPlayedLiked.name || 'Most loved', subtitle: state.mostPlayedLiked.subtitle || 'Most loved song', size: 'normal', artist: state.mostPlayedLiked.artists || '', cover: state.mostPlayedLiked.cover, id: state.mostPlayedLiked.id });
+            } else {
+                items.push({ title: 'Most loved', subtitle: '', size: 'normal' });
+            }
+
+            // third card: second-most-repeated track (must not be same as most-loved or the yearly most-played)
+            const exclude = new Set();
+            if (state.mostPlayedYear && state.mostPlayedYear.id) exclude.add(state.mostPlayedYear.id);
+            if (state.mostPlayedDaily && state.mostPlayedDaily.id) exclude.add(state.mostPlayedDaily.id);
+            if (state.mostPlayedLiked && state.mostPlayedLiked.id) exclude.add(state.mostPlayedLiked.id);
+            const secondRepeated = findSecondMostRepeatedExcluding(exclude);
+            if (secondRepeated) {
+                items.push({ title: secondRepeated.name || 'Second Most', subtitle: 'you might wanna listen', size: 'normal', artist: secondRepeated.artists || '', cover: secondRepeated.cover || '', id: secondRepeated.id });
+            } else {
+                items.push({ title: 'You might wanna listen', subtitle: '', size: 'normal' });
+            }
+
+
+            function getCoverOrIcon(item) {
+                if (item && item.cover) return item.cover;
+                // For any extra-bento tile that lacks a cover, use the neutral music icon
+                return generateMusicIconDataUrl();
+            }
+
+            items.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = 'extra-bento-item ' + (item.size || '');
+
+                const img = document.createElement('img');
+                img.src = getCoverOrIcon(item);
+                img.alt = item.title;
+
+                const ov = document.createElement('div');
+                ov.className = 'overlay';
+                ov.innerHTML = `<div class="title">${item.title}</div><div class="subtitle">${item.subtitle}</div>`;
+
+                div.appendChild(img);
+                div.appendChild(ov);
+
+                // click: if item represents a tracked song, attempt to play it; else navigate to search
+                div.addEventListener('click', async () => {
+                    if (item && item.id) {
+                        // try to find full track object in state
+                        let candidate = null;
+                        try {
+                            candidate = (state.allTracks || []).find(t => t.id === item.id) || (state.recentTracks || []).find(t => t.id === item.id) || (state.likedTracks || []).find(t => t.id === item.id) || item;
+                        } catch (e) { candidate = item; }
+                        if (candidate) {
+                            state.playlist = [candidate];
+                            try { await playTrack(0); } catch (e) { console.warn('Play from extra grid failed', e); }
+                            return;
+                        }
+                    }
+                    const nav = document.querySelector('.nav-item[data-view="search"]');
+                    if (nav) nav.click();
+                });
+
+                grid.appendChild(div);
+            });
+        }
+
         let searchTimeout;
         el.searchInput.addEventListener('input', e => {
             clearTimeout(searchTimeout);
@@ -2785,6 +3883,7 @@
                 const view = item.dataset.view;
                 state.currentView = view;
 
+                document.getElementById('homeView').style.display = view === 'home' ? 'block' : 'none';
                 document.getElementById('searchView').style.display = view === 'search' ? 'block' : 'none';
                 document.getElementById('recentView').style.display = view === 'recent' ? 'block' : 'none';
                 document.getElementById('likedView').style.display = view === 'liked' ? 'block' : 'none';
@@ -2798,9 +3897,29 @@
                     renderTracks(state.likedTracks, el.likedTracks);
                 } else if (view === 'blend') {
                     checkBlendUrl();
+                } else if (view === 'home') {
+                    // render greeting whenever user opens Home
+                    try { renderHomeView(); } catch (e) {}
                 }
             });
         });
+
+        // Initialize view on load based on state.currentView
+        (function initView() {
+            // set active nav
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            const nav = document.querySelector(`.nav-item[data-view="${state.currentView}"]`);
+            if (nav) nav.classList.add('active');
+
+            // show/hide views
+            document.getElementById('homeView').style.display = state.currentView === 'home' ? 'block' : 'none';
+            document.getElementById('searchView').style.display = state.currentView === 'search' ? 'block' : 'none';
+            document.getElementById('recentView').style.display = state.currentView === 'recent' ? 'block' : 'none';
+            document.getElementById('likedView').style.display = state.currentView === 'liked' ? 'block' : 'none';
+            document.getElementById('blendView').style.display = state.currentView === 'blend' ? 'block' : 'none';
+
+            try { if (state.currentView === 'home') renderHomeView(); } catch (e) {}
+        })();
 
         // WebRTC Blend
         function generateBlendId() {
@@ -3433,10 +4552,10 @@
                     const absFrom = state.blend.queue.findIndex(t => t.id === track.id);
                     let absTo = state.currentIndex + 1 + to;
                     if (absFrom === -1) return;
-                    const moved = state.blend.queue.splice(absFrom, 1)[0];
                     // adjust absTo if removal before insertion changed indices
                     if (absFrom < absTo) absTo = Math.max(state.currentIndex + 1, absTo - 1);
-                    state.blend.queue.splice(absTo, 0, moved);
+                    state.blend.queue.splice(absFrom, 1);
+                    state.blend.queue.splice(absTo, 0, track);
                     updateQueueUI();
 
                     if (state.blend.isHost) {

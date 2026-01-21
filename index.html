@@ -1750,6 +1750,119 @@
         }
     </style>
     <style>
+        /* Now-playing overlay: */
+        #nowPlayingOverlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: stretch;
+            justify-content: flex-start;
+            z-index: 3000;
+            background: #000; 
+        }
+
+        #nowPlayingOverlay.active { display: flex; }
+
+        /* overlay-card fills the viewport so the overlay feels like a full-screen player */
+        #nowPlayingOverlay .overlay-card {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 28px;
+            padding-top: 80px; 
+            box-sizing: border-box;
+            display: flex;
+            gap: 28px;
+            align-items: center;
+            justify-content: center;
+            flex-direction: row;
+            position: relative;
+        }
+
+        /* close button */
+        #nowPlayingOverlay .overlay-close {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 40;
+        }
+
+        #nowPlayingOverlay .overlay-close:active { transform: scale(0.98); }
+
+        /* artwork */
+        #nowPlayingOverlay .overlay-cover {
+            width: min(680px, 48%);
+            height: auto;
+            max-height: 80vh;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #111;
+            flex: 0 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+
+        #nowPlayingOverlay .overlay-info { flex: 1 1 auto; min-width: 0; color: #fafafa; padding: 12px 6px; }
+
+        #nowPlayingOverlay .overlay-title { font-size: 28px; font-weight: 800; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #nowPlayingOverlay .overlay-artist { font-size: 16px; color: #bdbdbd; margin-bottom: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* overlay controls (will be placed inside .overlay-bottom) */
+        #nowPlayingOverlay .overlay-controls {
+            display:flex;
+            align-items:center;
+            gap:16px;
+            margin:0;
+            background: transparent;
+        }
+
+        /* bottom container that anchors controls, seekbar and times to the bottom */
+        #nowPlayingOverlay .overlay-bottom {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 0 24px;
+            z-index: 30;
+        }
+
+        #nowPlayingOverlay .overlay-btn { width:56px; height:56px; border-radius:12px; border:none; background:#111; color:#fafafa; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+
+        #nowPlayingOverlay .overlay-progress { width:100%; display:block; height:10px; background:#121212; border-radius:6px; position:relative; cursor:pointer; }
+
+        #nowPlayingOverlay .overlay-progress .bar { height:100%; background:#ffffff; width:0%; border-radius:6px; }
+
+        #nowPlayingOverlay .overlay-times { display:flex; justify-content:space-between; color:#9a9a9a; font-size:13px; margin-top:8px; width:100%; box-sizing:border-box; }
+        @media (max-width:720px) {
+            #nowPlayingOverlay .overlay-card { flex-direction: column; align-items: center; padding: 18px 14px 14px; padding-top: 110px; }
+            #nowPlayingOverlay .overlay-cover { width: min(90%, 420px); max-height: 60vh; margin-top: 8px; }
+            #nowPlayingOverlay .overlay-info { padding: 8px 0; text-align: center; }
+            #nowPlayingOverlay .overlay-title { font-size: 20px; }
+            #nowPlayingOverlay .overlay-artist { font-size: 14px; }
+            #nowPlayingOverlay .overlay-controls { position: static; left: auto; transform: none; bottom: auto; margin: 14px 0 8px; justify-content: center; }
+            #nowPlayingOverlay .overlay-btn { width: 64px; height: 64px; border-radius: 14px; }
+            #nowPlayingOverlay .overlay-progress { width: calc(100% - 40px); height: 14px; border-radius: 8px; margin-top: 8px; }
+            #nowPlayingOverlay .overlay-progress .bar { height: 100%; border-radius: 8px; }
+            #nowPlayingOverlay .overlay-times { width: calc(100% - 40px); }
+        }
+    </style>
+    <style>
         /* Install banner styles (responsive) */
         #install-banner {
             position: fixed;
@@ -2177,6 +2290,32 @@
 
     <audio id="audio" crossorigin="anonymous"></audio>
 
+    <!-- Now playing overlay -->
+    <div id="nowPlayingOverlay" aria-hidden="true">
+        <div class="overlay-card" role="dialog" aria-modal="true">
+            <button id="overlayClose" class="overlay-close" title="Close">✕</button>
+            <img class="overlay-cover" id="overlayCover" src="/listenfreely.png" alt="Cover">
+            <div class="overlay-info">
+                <div class="overlay-title" id="overlayTitle">Title</div>
+                <div class="overlay-artist" id="overlayArtist">Artist</div>
+            </div>
+
+            <div class="overlay-bottom">
+                <div class="overlay-controls">
+                    <button class="overlay-btn" id="overlayPrev" title="Previous"></button>
+                    <button class="overlay-btn" id="overlayPlay" title="Play/Pause"></button>
+                    <button class="overlay-btn" id="overlayNext" title="Next"></button>
+                    <button class="overlay-btn" id="overlayLoop" title="Loop"></button>
+                </div>
+
+                <div class="overlay-progress" id="overlayProgress" aria-label="Seek">
+                    <div class="bar" id="overlayProgressBar"></div>
+                </div>
+                <div class="overlay-times"><span id="overlayCurrent">0:00</span><span id="overlayTotal">0:00</span></div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
     <script>
         const API_SOURCES = [
@@ -2208,6 +2347,7 @@
             currentIndex: -1,
             isPlaying: false,
             currentView: 'search',
+            loopState: localStorage.getItem('loopState') || 'none',
             recentTracks: JSON.parse(localStorage.getItem('recentTracks') || '[]'),
             likedTracks: JSON.parse(localStorage.getItem('likedTracks') || '[]'),
             blend: {
@@ -2268,6 +2408,11 @@
             confirmJoinBlendBtn: document.getElementById('confirmJoinBlendBtn'),
             cancelJoinBlendBtn: document.getElementById('cancelJoinBlendBtn')
         };
+
+        // initialize audio.loop according to saved loop state
+        try {
+            if (el.audio) el.audio.loop = (state.loopState === 'one');
+        } catch (e) {}
 
         function formatTime(s) {
             if (!s || isNaN(s)) return '0:00';
@@ -2568,19 +2713,34 @@
         });
 
         el.audio.addEventListener('ended', () => {
+            // handle loop modes: 'none' | 'all' | 'one'
+            const loop = state.loopState || 'none';
+            if (loop === 'one') {
+                // audio.loop should handle this, but ensure playback continues
+                // nothing to do here (browser will repeat current track)
+                return;
+            }
+
+            // For 'all' mode, wrap to start when at end
             if (state.currentIndex < state.playlist.length - 1) {
                 if (state.blend.active) {
-                    // Only host triggers next track to avoid race conditions
-                    if (state.blend.isHost) {
-                        playTrack(state.currentIndex + 1);
-                    }
+                    if (state.blend.isHost) playTrack(state.currentIndex + 1);
                 } else {
                     playTrack(state.currentIndex + 1);
                 }
             } else {
-                state.isPlaying = false;
-                el.playIcon.style.display = 'block';
-                el.pauseIcon.style.display = 'none';
+                if (loop === 'all' && state.playlist.length > 0) {
+                    // go to first track
+                    if (state.blend.active) {
+                        if (state.blend.isHost) playTrack(0);
+                    } else {
+                        playTrack(0);
+                    }
+                } else {
+                    state.isPlaying = false;
+                    el.playIcon.style.display = 'block';
+                    el.pauseIcon.style.display = 'none';
+                }
             }
         });
 
@@ -3184,6 +3344,7 @@
             updateParticipants();
             updateQueueUI();
             updateNowPlaying();
+            try { if (typeof updateLoopVisibility === 'function') updateLoopVisibility(); } catch (e) {}
         }
 
         function updateNowPlaying() {
@@ -3455,6 +3616,228 @@
         });
 
         checkBlendUrl();
+
+        // Now-playing overlay: open when user taps the player title or cover
+        (function () {
+            const audio = document.getElementById('audio');
+            const overlay = document.getElementById('nowPlayingOverlay');
+            const overlayCover = document.getElementById('overlayCover');
+            const overlayTitle = document.getElementById('overlayTitle');
+            const overlayArtist = document.getElementById('overlayArtist');
+            const overlayPlay = document.getElementById('overlayPlay');
+            const overlayPrev = document.getElementById('overlayPrev');
+            const overlayNext = document.getElementById('overlayNext');
+            const overlayLoop = document.getElementById('overlayLoop');
+            const overlayClose = document.getElementById('overlayClose');
+            const overlayProgress = document.getElementById('overlayProgress');
+            const overlayProgressBar = document.getElementById('overlayProgressBar');
+            const overlayCurrent = document.getElementById('overlayCurrent');
+            const overlayTotal = document.getElementById('overlayTotal');
+
+            function formatTime(s) { s = Math.max(0, Math.floor(s||0)); return Math.floor(s/60)+':' + String(s%60).padStart(2,'0'); }
+
+            // collect control SVGs from bottom player for consistent icons
+            const bottomPrevSvg = document.querySelector('#prevBtn svg');
+            const bottomNextSvg = document.querySelector('#nextBtn svg');
+            const bottomPlayIcon = document.getElementById('playIcon');
+            const bottomPauseIcon = document.getElementById('pauseIcon');
+
+            function renderControlIcons() {
+                try {
+                    // prev
+                    overlayPrev.innerHTML = '';
+                    if (bottomPrevSvg) {
+                        const clone = bottomPrevSvg.cloneNode(true);
+                        clone.style.width = '22px';
+                        clone.style.height = '22px';
+                        overlayPrev.appendChild(clone);
+                    } else {
+                        overlayPrev.textContent = 'Prev';
+                    }
+
+                    // next
+                    overlayNext.innerHTML = '';
+                    if (bottomNextSvg) {
+                        const clone = bottomNextSvg.cloneNode(true);
+                        clone.style.width = '22px';
+                        clone.style.height = '22px';
+                        overlayNext.appendChild(clone);
+                    } else {
+                        overlayNext.textContent = 'Next';
+                    }
+
+                    // play/pause - choose based on audio state
+                    overlayPlay.innerHTML = '';
+                    const which = (audio && !audio.paused) ? bottomPauseIcon : bottomPlayIcon;
+                    if (which) {
+                        const clone = which.cloneNode(true);
+                        clone.style.width = '26px';
+                        clone.style.height = '26px';
+                        overlayPlay.appendChild(clone);
+                    } else {
+                        overlayPlay.textContent = (audio && !audio.paused) ? 'Pause' : 'Play';
+                    }
+                    // loop icon (render separately)
+                    try { renderLoopIcon(); } catch (e) {}
+                } catch (err) {
+                    // fallback
+                }
+            }
+
+            function syncFromPlayer() {
+                const pc = document.getElementById('playerCover');
+                const pt = document.getElementById('playerTitle');
+                const pa = document.getElementById('playerArtist');
+                if (pc && pc.src) overlayCover.src = pc.src;
+                if (pt) overlayTitle.textContent = pt.textContent.trim();
+                if (pa) overlayArtist.textContent = pa.textContent.trim();
+                overlayTotal.textContent = formatTime(audio.duration || 0);
+                overlayCurrent.textContent = formatTime(audio.currentTime || 0);
+                overlayProgressBar.style.width = ((audio.currentTime||0)/(audio.duration||1))*100 + '%';
+                // update control icons
+                renderControlIcons();
+                // update loop icon & visibility
+                try { updateLoopVisibility(); } catch (e) {}
+            }
+
+            // Loop control: none | all | one
+            function getLoopState() {
+                return state.loopState || (localStorage.getItem('loopState') || 'none');
+            }
+
+            function setLoopState(s) {
+                state.loopState = s;
+                localStorage.setItem('loopState', s);
+                // audio.loop property controls single-track repeating
+                if (audio) audio.loop = (s === 'one');
+                renderLoopIcon();
+            }
+
+            function renderLoopIcon() {
+                if (!overlayLoop) return;
+                const s = getLoopState();
+                overlayLoop.innerHTML = '';
+                overlayLoop.style.opacity = (s === 'none') ? '0.85' : '1';
+                // hide when in blend mode
+                if (state.blend && state.blend.active) {
+                    overlayLoop.style.display = 'none';
+                    return;
+                } else {
+                    overlayLoop.style.display = 'flex';
+                }
+
+                if (s === 'all') {
+                    // use provided repeat-every.svg (converted to currentColor and scaled)
+                    overlayLoop.innerHTML = `
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3.5 13L3.29592 12.0476C2.62895 8.93509 5.00172 6 8.18494 6H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M19 6L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M19 6L16 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M20.5 11L20.7041 11.9524C21.3711 15.0649 18.9983 18 15.8151 18H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M5 18L8 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M5 18L8 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>`;
+                } else if (s === 'one') {
+                    // use provided loop-single.svg (converted stroke to currentColor)
+                    overlayLoop.innerHTML = `
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 18H7C5.34315 18 4 16.6569 4 15V9C4 7.34315 5.34315 6 7 6H17C18.6569 6 20 7.34315 20 9V15C20 16.6569 18.6569 18 17 18H12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 18L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 18L15 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>`;
+                } else {
+                    // use provided no-repeat.svg (trimmed rect removed, scaled to 20)
+                    overlayLoop.innerHTML = `
+                        <svg viewBox="0 0 48 48" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M43.8233 25.2305C43.7019 25.9889 43.5195 26.727 43.2814 27.4395C42.763 28.9914 41.9801 30.4222 40.9863 31.6785C38.4222 34.9201 34.454 37 30 37H16C9.39697 37 4 31.6785 4 25C4 18.3502 9.39624 13 16 13L44 13" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M38 7L44 13L38 19" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>`;
+                }
+            }
+
+            function updateLoopVisibility() {
+                if (!overlayLoop) return;
+                if (state.blend && state.blend.active) {
+                    overlayLoop.style.display = 'none';
+                } else {
+                    overlayLoop.style.display = 'flex';
+                }
+            }
+
+            if (overlayLoop) {
+                overlayLoop.addEventListener('click', () => {
+                    // cycle none -> all -> one -> none
+                    const order = ['none','all','one'];
+                    const cur = getLoopState();
+                    const next = order[(order.indexOf(cur) + 1) % order.length];
+                    setLoopState(next);
+                });
+                // initialise state
+                try { setLoopState(getLoopState()); } catch (e) {}
+            }
+
+            // show overlay
+            function openOverlay() {
+                syncFromPlayer();
+                overlay.classList.add('active');
+                overlay.setAttribute('aria-hidden','false');
+            }
+
+            function closeOverlay() {
+                overlay.classList.remove('active');
+                overlay.setAttribute('aria-hidden','true');
+            }
+
+            // hook clicks on player title and cover
+            const playerCoverWrapper = document.getElementById('playerCoverWrapper');
+            const playerTitleEl = document.getElementById('playerTitle');
+            if (playerCoverWrapper) playerCoverWrapper.addEventListener('click', openOverlay);
+            if (playerTitleEl) playerTitleEl.addEventListener('click', openOverlay);
+
+            // overlay close by clicking backdrop
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); });
+            // close button
+            if (overlayClose) overlayClose.addEventListener('click', closeOverlay);
+            // close with Escape key
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape' || ev.key === 'Esc') {
+                    if (overlay && overlay.classList.contains('active')) closeOverlay();
+                }
+            });
+
+            // play/pause
+            overlayPlay.addEventListener('click', () => {
+                if (typeof el !== 'undefined' && el.playBtn) {
+                    el.playBtn.click();
+                } else if (audio) {
+                    if (audio.paused) audio.play(); else audio.pause();
+                }
+                setTimeout(syncFromPlayer, 50);
+            });
+
+            // prev/next
+            overlayPrev.addEventListener('click', () => { if (typeof el !== 'undefined' && el.prevBtn) el.prevBtn.click(); });
+            overlayNext.addEventListener('click', () => { if (typeof el !== 'undefined' && el.nextBtn) el.nextBtn.click(); });
+
+            // seek bar interaction
+            function seekFromEvent(e) {
+                const r = overlayProgress.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+                const p = Math.max(0, Math.min(1, x / r.width));
+                if (audio && isFinite(audio.duration) && audio.duration > 0) audio.currentTime = p * audio.duration;
+                syncFromPlayer();
+            }
+            overlayProgress.addEventListener('click', seekFromEvent);
+            overlayProgress.addEventListener('touchstart', (e)=>{ seekFromEvent(e); }, {passive:true});
+
+            // sync overlay while audio plays
+            if (audio) {
+                audio.addEventListener('timeupdate', syncFromPlayer);
+                audio.addEventListener('loadedmetadata', syncFromPlayer);
+                audio.addEventListener('play', syncFromPlayer);
+                audio.addEventListener('pause', syncFromPlayer);
+            }
+        })();
     </script>
 </body>
 

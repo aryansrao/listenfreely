@@ -131,6 +131,20 @@
             color: #666;
         }
 
+        /* Fix Chrome autofill / suggestion white background for the search input */
+        .search-input:-webkit-autofill,
+        .search-input:-webkit-autofill:focus,
+        .search-input:-webkit-autofill:hover,
+        #searchInput:-webkit-autofill,
+        #searchInput:-webkit-autofill:focus,
+        #searchInput:-webkit-autofill:hover {
+            -webkit-text-fill-color: #fafafa !important;
+            caret-color: #fafafa !important;
+            box-shadow: 0 0 0px 1000px #0a0a0a inset !important;
+            background-clip: content-box;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
         .section-title {
             font-size: 20px;
             font-weight: 600;

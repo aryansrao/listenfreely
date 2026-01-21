@@ -1230,6 +1230,29 @@
                 gap: 10px;
             }
 
+            /* Mobile: make player title and controls share a single row */
+            /* Use a grid to place title+controls on top row, seekbar on its own row */
+            .player-bar .player-content {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                grid-template-rows: auto auto;
+                grid-template-areas: "track controls" "progress progress";
+                gap: 8px 12px;
+                align-items: center;
+            }
+
+            .player-bar .player-track { grid-area: track; display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+            /* allow children of .player-controls to participate directly in the grid */
+            .player-bar .player-controls { display: contents; }
+
+            .player-bar .controls-buttons { grid-area: controls; justify-self: end; display: flex; gap: 12px; align-items: center; }
+
+            .player-bar .progress-wrapper { grid-area: progress; width: 100%; }
+
+            .player-bar .player-info { min-width: 0; overflow: hidden; }
+            .player-bar .player-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
             .player-track {
                 padding: 0;
                 gap: 8px;

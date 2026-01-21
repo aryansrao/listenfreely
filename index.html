@@ -3268,7 +3268,7 @@
 
                 if (maxId && meta[maxId]) {
                     const t = Object.assign({}, meta[maxId]);
-                    t.subtitle = 'Most loved song';
+                    t.subtitle = 'Your most loved song';
                     state.mostPlayedLiked = t;
                 } else {
                     state.mostPlayedLiked = null;
@@ -3841,7 +3841,7 @@
             }
             // fallback tiles: prefer most-played liked song, otherwise a neutral placeholder
             if (state.mostPlayedLiked && state.mostPlayedLiked.id) {
-                items.push({ title: state.mostPlayedLiked.name || 'Most loved', subtitle: state.mostPlayedLiked.subtitle || 'Most loved song', size: 'normal', artist: state.mostPlayedLiked.artists || '', cover: state.mostPlayedLiked.cover, id: state.mostPlayedLiked.id });
+                items.push({ title: state.mostPlayedLiked.name || 'Most loved', subtitle: state.mostPlayedLiked.subtitle || 'Your most loved song', size: 'normal', artist: state.mostPlayedLiked.artists || '', cover: state.mostPlayedLiked.cover, id: state.mostPlayedLiked.id });
             } else {
                 items.push({ title: 'Most loved', subtitle: '', size: 'normal' });
             }
@@ -3853,9 +3853,9 @@
             if (state.mostPlayedLiked && state.mostPlayedLiked.id) exclude.add(state.mostPlayedLiked.id);
             const secondRepeated = findSecondMostRepeatedExcluding(exclude);
             if (secondRepeated) {
-                items.push({ title: secondRepeated.name || 'Second Most', subtitle: 'you might wanna listen', size: 'normal', artist: secondRepeated.artists || '', cover: secondRepeated.cover || '', id: secondRepeated.id });
+                items.push({ title: secondRepeated.name || 'Second Most', subtitle: 'You might wanna play', size: 'normal', artist: secondRepeated.artists || '', cover: secondRepeated.cover || '', id: secondRepeated.id });
             } else {
-                items.push({ title: 'You might wanna listen', subtitle: '', size: 'normal' });
+                items.push({ title: 'You might wanna play', subtitle: '', size: 'normal' });
             }
 
 

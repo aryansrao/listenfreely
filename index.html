@@ -673,6 +673,11 @@
             margin-bottom: 12px;
             font-weight: 600;
         }
+        
+            /* ensure overlay icons are sized and the heart can switch between outline/fill */
+            #nowPlayingOverlay .overlay-btn svg { width: 22px; height: 22px; display: block; }
+            #nowPlayingOverlay .overlay-btn svg { stroke: currentColor; }
+            #nowPlayingOverlay .overlay-btn.like-active svg { fill: currentColor; stroke: none; }
 
         .now-playing-track {
             display: flex;
@@ -2472,6 +2477,9 @@
 
         #nowPlayingOverlay .overlay-btn { width:56px; height:56px; border-radius:12px; border:none; background:#111; color:#fafafa; display:flex; align-items:center; justify-content:center; cursor:pointer; }
 
+        /* heart/like state for overlay button */
+        #nowPlayingOverlay .overlay-btn.like-active { color: #ff6b6b; background: rgba(255,107,107,0.06); }
+
         #nowPlayingOverlay .overlay-progress { width:100%; display:block; height:10px; background:#121212; border-radius:6px; position:relative; cursor:pointer; }
 
         #nowPlayingOverlay .overlay-progress .bar { height:100%; background:#ffffff; width:0%; border-radius:6px; }
@@ -2488,6 +2496,35 @@
             #nowPlayingOverlay .overlay-progress { width: calc(100% - 40px); height: 14px; border-radius: 8px; margin-top: 8px; }
             #nowPlayingOverlay .overlay-progress .bar { height: 100%; border-radius: 8px; }
             #nowPlayingOverlay .overlay-times { width: calc(100% - 40px); }
+        }
+
+        /* Make overlay controls responsive to avoid horizontal cropping on narrow phones */
+        @media (max-width:720px) {
+            #nowPlayingOverlay .overlay-bottom { padding-left: env(safe-area-inset-left, 16px); padding-right: env(safe-area-inset-right, 16px); box-sizing: border-box; }
+            /* keep large icon sizes but allow wrapping into multiple rows to avoid cropping */
+            #nowPlayingOverlay .overlay-controls { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; max-width: 100%; box-sizing: border-box; }
+            #nowPlayingOverlay .overlay-controls .overlay-btn { width: 64px; height: 64px; }
+        }
+
+        @media (max-width:480px) {
+            #nowPlayingOverlay .overlay-controls { gap: 8px; }
+            /* keep icons large on narrow phones; wrapping prevents horizontal cropping */
+            #nowPlayingOverlay .overlay-controls .overlay-btn { width: 64px; height: 64px; border-radius: 12px; }
+            #nowPlayingOverlay .overlay-bottom { padding-left: 12px; padding-right: 12px; }
+            /* ensure progress and times stack nicely */
+            #nowPlayingOverlay .overlay-progress { width: calc(100% - 24px); }
+            #nowPlayingOverlay .overlay-times { width: calc(100% - 24px); }
+        }
+
+        /* Slightly smaller sizes on very narrow devices to avoid any edge-cropping */
+        @media (max-width:420px) {
+            #nowPlayingOverlay .overlay-controls .overlay-btn { width: 56px; height: 56px; }
+            #nowPlayingOverlay .overlay-controls .overlay-btn svg { width: 20px; height: 20px; }
+        }
+
+        @media (max-width:360px) {
+            #nowPlayingOverlay .overlay-controls .overlay-btn { width: 52px; height: 52px; }
+            #nowPlayingOverlay .overlay-controls .overlay-btn svg { width: 18px; height: 18px; }
         }
         /* Home view greeting */
         /* Left-align Home content on desktop so tiles sit to the left column */
@@ -3002,6 +3039,11 @@
 
             <div class="overlay-bottom">
                 <div class="overlay-controls">
+                    <button class="overlay-btn" id="overlayLike" title="Like/Unlike">
+                        <svg id="overlayLikeIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 3.99 4 6.5 4 8.24 4 9.91 4.81 11 6.09 12.09 4.81 13.76 4 15.5 4 18.01 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/>
+                        </svg>
+                    </button>
                     <button class="overlay-btn" id="overlayPrev" title="Previous"></button>
                     <button class="overlay-btn" id="overlayPlay" title="Play/Pause"></button>
                     <button class="overlay-btn" id="overlayNext" title="Next"></button>
@@ -3378,6 +3420,8 @@
             joinBlendInput: document.getElementById('joinBlendInput'),
             confirmJoinBlendBtn: document.getElementById('confirmJoinBlendBtn'),
             cancelJoinBlendBtn: document.getElementById('cancelJoinBlendBtn')
+            ,overlayLike: document.getElementById('overlayLike')
+            ,overlayLikeIcon: document.getElementById('overlayLikeIcon')
         };
 
         // initialize audio.loop according to saved loop state
@@ -3564,6 +3608,30 @@
             }
         }
 
+        // Toggle like using a full track object (useful for overlay where currentTrack
+        // may not be part of the current `state.playlist` array)
+        function toggleLikeByTrack(track) {
+            if (!track) return;
+            const id = track.id || ((track.downloadUrl || '') + '::' + (track.name || 'unknown'));
+            const index = state.likedTracks.findIndex(t => t.id === id);
+            if (index > -1) {
+                state.likedTracks.splice(index, 1);
+            } else {
+                // prefer storing a lightweight track object
+                state.likedTracks.unshift({ id: id, name: track.name || track.title || 'Unknown', artists: track.artists || '', cover: track.cover || '', downloadUrl: track.downloadUrl || '' });
+            }
+            localStorage.setItem('likedTracks', JSON.stringify(state.likedTracks));
+            updateLikeButtons();
+
+            if (state.currentView === 'liked') {
+                renderTracks(state.likedTracks, el.likedTracks);
+            } else if (state.currentView === 'recent') {
+                renderTracks(state.recentTracks, el.recentTracks);
+            } else if (state.currentView === 'blend') {
+                try { updateQueueUI(); } catch (e) {}
+            }
+        }
+
         // Update all like buttons across the UI to reflect current liked state
         function updateLikeButtons() {
             document.querySelectorAll('.like-btn').forEach(btn => {
@@ -3577,11 +3645,31 @@
                     if (svg) svg.setAttribute('fill', 'none');
                 }
             });
+            // also update overlay like button if present
+            try { updateOverlayLikeButton(); } catch (e) {}
         }
 
         function addToRecent(track) {
             state.recentTracks = [track, ...state.recentTracks.filter(t => t.id !== track.id)].slice(0, 50);
             localStorage.setItem('recentTracks', JSON.stringify(state.recentTracks));
+        }
+
+        function updateOverlayLikeButton() {
+            const btn = el.overlayLike;
+            const ico = el.overlayLikeIcon;
+            if (!btn || !ico) return;
+            const t = state.currentTrack;
+            if (t && isLiked(t.id)) {
+                btn.classList.add('active');
+                btn.classList.add('like-active');
+                ico.setAttribute('fill', 'currentColor');
+                ico.setAttribute('stroke', 'none');
+            } else {
+                btn.classList.remove('active');
+                btn.classList.remove('like-active');
+                ico.setAttribute('fill', 'none');
+                ico.setAttribute('stroke', 'currentColor');
+            }
         }
 
         async function playTrack(index, skipBroadcast = false) {
@@ -3622,6 +3710,7 @@
 
                 // ensure the player bar is visible now that a track is selected/playing
                 try { updatePlayerBarVisibility(); } catch (e) {}
+                try { updateOverlayLikeButton(); } catch (e) {}
 
                 addToRecent(state.currentTrack);
                 try {
@@ -3682,6 +3771,18 @@
                 }
             }
         });
+
+        // overlay like button: toggle like for the currently playing track
+        if (el.overlayLike) {
+            el.overlayLike.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!state.currentTrack) return;
+                try {
+                    toggleLikeByTrack(state.currentTrack);
+                    updateOverlayLikeButton();
+                } catch (err) { console.warn('overlay like failed', err); }
+            });
+        }
 
         el.prevBtn.addEventListener('click', () => {
             if (state.currentIndex > 0) {
@@ -3959,6 +4060,7 @@
 
             try { if (state.currentView === 'home') renderHomeView(); } catch (e) {}
             try { updatePlayerBarVisibility(); } catch (e) {}
+            try { updateOverlayLikeButton(); } catch (e) {}
         })();
 
         // WebRTC Blend

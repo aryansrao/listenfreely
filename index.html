@@ -1749,6 +1749,94 @@
             }
         }
     </style>
+    <style>
+        /* Install banner styles (responsive) */
+        #install-banner {
+            position: fixed;
+            left: 12px;
+            right: 12px;
+            bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+            z-index: 2000;
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            max-width: 820px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            color: #fafafa;
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        #install-banner .install-left {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        #install-banner .install-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex: 0 0 auto;
+        }
+
+        #install-banner .install-text {
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        #install-banner .install-text > div:first-child {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        #install-banner .install-text > div:nth-child(2) {
+            color: #9a9a9a;
+            font-size: 12px;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #install-banner .install-actions {
+            display: flex;
+            gap: 8px;
+            flex: 0 0 auto;
+            align-items: center;
+        }
+
+        .install-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .install-primary { background: #fafafa; color: #000; }
+        .install-secondary { background: transparent; color: #fafafa; border: 1px solid rgba(255,255,255,0.06); }
+        .install-cancel { background: transparent; color: #9a9a9a; }
+
+        /* Responsive: stack on narrow screens */
+        @media (max-width: 520px) {
+            #install-banner { flex-direction: column; align-items: stretch; padding: 12px; }
+            #install-banner .install-left { gap: 10px; }
+            #install-banner .install-actions { flex-direction: column; gap: 8px; margin-top: 8px; }
+            .install-btn { width: 100%; }
+            #install-banner .install-icon { width: 48px; height: 48px; }
+        }
+    </style>
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/listenfreely.png">
     <meta name="theme-color" content="#000000">
@@ -1764,45 +1852,27 @@
                 if (existing) return existing;
                 const banner = document.createElement('div');
                 banner.id = 'install-banner';
-                banner.style.position = 'fixed';
-                banner.style.left = '12px';
-                banner.style.right = '12px';
-                banner.style.bottom = '84px';
-                banner.style.zIndex = 2000;
-                banner.style.background = '#0a0a0a';
-                banner.style.border = '1px solid #1a1a1a';
-                banner.style.padding = '12px';
-                banner.style.borderRadius = '10px';
-                banner.style.display = 'flex';
-                banner.style.gap = '8px';
-                banner.style.alignItems = 'center';
-                banner.style.justifyContent = 'space-between';
-                banner.style.boxShadow = '0 6px 18px rgba(0,0,0,0.6)';
+                banner.className = 'install-banner';
 
                 const left = document.createElement('div');
-                left.style.display = 'flex';
-                left.style.alignItems = 'center';
-                left.style.gap = '12px';
+                left.className = 'install-left';
 
                 const img = document.createElement('img');
                 img.src = '/listenfreely.png';
-                img.style.width = '48px';
-                img.style.height = '48px';
-                img.style.borderRadius = '8px';
+                img.className = 'install-icon';
                 left.appendChild(img);
 
                 const text = document.createElement('div');
-                text.style.flex = '1';
-                text.style.color = '#fafafa';
-                text.innerHTML = '<div style="font-weight:600">Install ListenFreely</div><div style="font-size:12px;color:#888;margin-top:2px">Open quickly from your home screen and keep it updated</div>';
+                text.className = 'install-text';
+                text.innerHTML = '<div>Install ListenFreely</div><div>Open quickly from your home screen and keep it updated</div>';
                 left.appendChild(text);
 
                 const actions = document.createElement('div');
+                actions.className = 'install-actions';
 
                 const installBtn = document.createElement('button');
                 installBtn.innerText = 'Install';
-                installBtn.style.marginRight = '8px';
-                installBtn.className = 'btn btn-primary btn-small';
+                installBtn.className = 'install-btn install-primary';
                 installBtn.onclick = async () => {
                     if (!deferredPrompt) return;
                     deferredPrompt.prompt();
@@ -1811,22 +1881,12 @@
                     hideBanner();
                 };
 
-                const openBtn = document.createElement('button');
-                openBtn.innerText = 'Open in App';
-                openBtn.className = 'btn btn-secondary btn-small';
-                openBtn.onclick = () => {
-                    // If PWA is installed this will be a no-op; otherwise suggest reload
-                    hideBanner();
-                    try { window.location.href = window.location.href; } catch(e){}
-                };
-
                 const cancelBtn = document.createElement('button');
                 cancelBtn.innerText = 'Cancel';
-                cancelBtn.className = 'btn btn-small';
+                cancelBtn.className = 'install-btn install-cancel';
                 cancelBtn.onclick = hideBanner;
 
                 actions.appendChild(installBtn);
-                actions.appendChild(openBtn);
                 actions.appendChild(cancelBtn);
 
                 banner.appendChild(left);

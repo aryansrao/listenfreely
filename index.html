@@ -246,6 +246,8 @@
             padding: 16px 24px;
         }
 
+        .player-bar.hidden { display: none !important; }
+
         .player-content {
             display: flex;
             align-items: center;
@@ -3383,6 +3385,17 @@
             if (el.audio) el.audio.loop = (state.loopState === 'one');
         } catch (e) {}
 
+        // show/hide player bar depending on whether a track is selected
+        function updatePlayerBarVisibility() {
+            const pb = document.querySelector('.player-bar');
+            if (!pb) return;
+            if (state.currentTrack && (state.currentTrack.id || state.currentTrack.downloadUrl)) {
+                pb.classList.remove('hidden');
+            } else {
+                pb.classList.add('hidden');
+            }
+        }
+
         function formatTime(s) {
             if (!s || isNaN(s)) return '0:00';
             const m = Math.floor(s / 60);
@@ -3606,6 +3619,9 @@
                 state.isPlaying = true;
                 el.playIcon.style.display = 'none';
                 el.pauseIcon.style.display = 'block';
+
+                // ensure the player bar is visible now that a track is selected/playing
+                try { updatePlayerBarVisibility(); } catch (e) {}
 
                 addToRecent(state.currentTrack);
                 try {
@@ -3942,6 +3958,7 @@
             document.getElementById('blendView').style.display = state.currentView === 'blend' ? 'block' : 'none';
 
             try { if (state.currentView === 'home') renderHomeView(); } catch (e) {}
+            try { updatePlayerBarVisibility(); } catch (e) {}
         })();
 
         // WebRTC Blend

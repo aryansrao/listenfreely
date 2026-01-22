@@ -1252,6 +1252,12 @@
                 font-size: 12px;
             }
 
+
+            /* Download button states */
+            .download-btn.downloading svg { transform-origin: 50% 50%; animation: lf-rotate 1s linear infinite; }
+            @keyframes lf-rotate { to { transform: rotate(360deg); } }
+            /* Hide download icon when already downloaded */
+            .download-btn.downloaded { display: none; }
             .icon-btn {
                 padding: 6px;
             }
@@ -2836,6 +2842,12 @@
                     </svg>
                     <span>Liked Songs</span>
                 </div>
+                <div class="nav-item" data-view="downloads">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l4-4m-4 4l-4-4M21 21H3" />
+                    </svg>
+                    <span>Downloads</span>
+                </div>
                 <div class="nav-item" data-view="blend">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -2894,6 +2906,11 @@
             <div id="likedView" style="display: none;">
                 <h2 class="section-title">Liked Songs</h2>
                 <div class="tracks-grid" id="likedTracks"></div>
+            </div>
+
+            <div id="downloadsView" style="display: none;">
+                <h2 class="section-title">Downloads</h2>
+                <div class="tracks-grid" id="downloadsList"></div>
             </div>
 
             <div id="blendView" style="display: none;">
@@ -3125,6 +3142,9 @@
             loopState: localStorage.getItem('loopState') || 'none',
             recentTracks: JSON.parse(localStorage.getItem('recentTracks') || '[]'),
             likedTracks: JSON.parse(localStorage.getItem('likedTracks') || '[]'),
+            // offline tracking
+            offlineTracks: [], // lightweight metadata list
+            offlineUrlMap: {}, // id -> objectURL created for playback
             blend: {
                 active: false,
                 isHost: false,
@@ -3210,6 +3230,299 @@
         try { loadYearlyMostPlayed(new Date().getFullYear()); } catch (e) {}
         // load liked-play aggregation (global most-loved)
         try { loadMostPlayedLiked(); } catch (e) {}
+
+        // Whether the app is running as a PWA (standalone) — downloads only allowed in PWA mode
+        function isPWA() {
+            return window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        }
+
+        // Download a track when running as a PWA. Uses the File System Access API if available,
+        // otherwise falls back to a normal anchor download. If not running as a PWA, shows a prompt.
+        async function downloadTrackPWA(track) {
+            if (!isPWA()) {
+                alert('Please install the app (add to home screen) to enable downloads.');
+                return;
+            }
+            if (!track || !track.downloadUrl) { alert('No downloadable URL available for this track.'); return; }
+            try {
+                const res = await fetch(track.downloadUrl);
+                if (!res.ok) throw new Error('Download failed');
+                const blob = await res.blob();
+                const sanitize = (s) => (s || 'track').replace(/[\\/:*?"<>|]/g, '_').slice(0, 120);
+                const suggested = sanitize(track.name) + '.mp3';
+                if (window.showSaveFilePicker) {
+                    try {
+                        const handle = await window.showSaveFilePicker({ suggestedName: suggested, types: [{ description: 'MP3', accept: { 'audio/mpeg': ['.mp3'] } }] });
+                        const writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                        alert('Saved to device');
+                        return;
+                    } catch (e) {
+                        // user cancelled or API failed — fall through to anchor fallback
+                    }
+                }
+                // fallback: trigger a normal download (should work in many PWA contexts)
+                const fileUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = fileUrl;
+                a.download = suggested;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(fileUrl), 5000);
+            } catch (e) {
+                console.error('downloadTrackPWA failed', e);
+                alert('Download failed');
+            }
+        }
+
+        // ---------- IndexedDB offline store (automatic saves & playback) ----------
+        const OFFLINE_DB = 'ListenFreelyOffline';
+        const OFFLINE_STORE = 'tracks';
+
+        function openOfflineDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(OFFLINE_DB, 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(OFFLINE_STORE)) {
+                        const s = db.createObjectStore(OFFLINE_STORE, { keyPath: 'id' });
+                        s.createIndex('by-created', 'created', { unique: false });
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function initOfflineDB() {
+            try {
+                state.offlineDB = await openOfflineDB();
+            } catch (e) {
+                console.warn('Could not open offline DB', e);
+                state.offlineDB = null;
+            }
+        }
+
+        // Save track to offline store. Only proceeds when called with {userInitiated:true}
+        async function saveTrackToOffline(track, opts = {}) {
+            if (!opts.userInitiated) {
+                console.warn('saveTrackToOffline called without userInitiated flag - ignoring to prevent unintended saves');
+                console.trace();
+                return;
+            }
+            if (!track) throw new Error('No track');
+            await initOfflineDB();
+            if (!state.offlineDB) throw new Error('Offline DB not available');
+            const id = track.id || ((track.downloadUrl || '') + '::' + (track.name || 'unknown'));
+            // fetch blob
+            const res = await fetch(track.downloadUrl);
+            if (!res.ok) throw new Error('Fetch failed');
+            const blob = await res.blob();
+            const rec = { id, name: track.name || '', artists: track.artists || '', cover: track.cover || '', blob, created: Date.now() };
+            return new Promise((resolve, reject) => {
+                const tx = state.offlineDB.transaction(OFFLINE_STORE, 'readwrite');
+                const store = tx.objectStore(OFFLINE_STORE);
+                const p = store.put(rec);
+                p.onsuccess = () => {
+                    loadOfflineIndex().then(() => resolve(rec)).catch(reject);
+                };
+                p.onerror = () => reject(p.error);
+            });
+        }
+
+        async function removeOfflineTrack(id) {
+            await initOfflineDB();
+            if (!state.offlineDB) return;
+            return new Promise((resolve, reject) => {
+                const tx = state.offlineDB.transaction(OFFLINE_STORE, 'readwrite');
+                const store = tx.objectStore(OFFLINE_STORE);
+                const p = store.delete(id);
+                p.onsuccess = () => {
+                    // revoke any created object URL and stop playback if it was playing
+                    try {
+                        const url = state.offlineUrlMap[id];
+                        if (url) {
+                            try { URL.revokeObjectURL(url); } catch (e) {}
+                            delete state.offlineUrlMap[id];
+                            // if currently playing that url, stop and clear player
+                            try {
+                                if (el.audio && el.audio.src === url) {
+                                    el.audio.pause();
+                                    el.audio.src = '';
+                                    state.isPlaying = false;
+                                    el.playIcon.style.display = 'block';
+                                    el.pauseIcon.style.display = 'none';
+                                    el.playerTitle.textContent = 'No track selected';
+                                    el.playerArtist.textContent = 'Select a song to play';
+                                }
+                            } catch (e) {}
+                        }
+                    } catch (e) {}
+                    loadOfflineIndex().then(() => {
+                        try { refreshDownloadButtons(); } catch (e) {}
+                        resolve();
+                    }).catch(reject);
+                };
+                p.onerror = () => reject(p.error);
+            });
+        }
+
+        async function getOfflineTrackUrl(id) {
+            await initOfflineDB();
+            if (!state.offlineDB) return null;
+            return new Promise((resolve, reject) => {
+                const tx = state.offlineDB.transaction(OFFLINE_STORE, 'readonly');
+                const store = tx.objectStore(OFFLINE_STORE);
+                const p = store.get(id);
+                p.onsuccess = () => {
+                    const rec = p.result;
+                    if (!rec || !rec.blob) return resolve(null);
+                    // Reuse previously-created object URL if present to avoid leaks
+                    if (state.offlineUrlMap[id]) {
+                        resolve(state.offlineUrlMap[id]);
+                        return;
+                    }
+                    const url = URL.createObjectURL(rec.blob);
+                    state.offlineUrlMap[id] = url;
+                    resolve(url);
+                };
+                p.onerror = () => reject(p.error);
+            });
+        }
+
+        // Play an offline-saved track using the main player UI (updates state/currentTrack)
+        async function playOfflineTrack(id) {
+            if (!id) throw new Error('No id');
+            const url = await getOfflineTrackUrl(id);
+            if (!url) throw new Error('Offline file not found');
+
+            const meta = (state.offlineTracks || []).find(r => r.id === id) || { id, name: 'Unknown', artists: '', cover: '' };
+
+            // Set currentTrack to a lightweight object so the rest of the UI can use it
+            state.currentTrack = { id: meta.id, name: meta.name, artists: meta.artists, cover: meta.cover, downloadUrl: url };
+            state.playlist = [state.currentTrack];
+            state.currentIndex = 0;
+
+            // Update player cover/title/artist UI
+            if (state.currentTrack.cover) {
+                el.playerCover.src = state.currentTrack.cover;
+                el.playerCover.style.display = 'block';
+                el.placeholderIcon.style.display = 'none';
+                el.playerCoverWrapper.classList.remove('placeholder');
+            } else {
+                el.playerCover.style.display = 'none';
+                el.placeholderIcon.style.display = 'block';
+                el.playerCoverWrapper.classList.add('placeholder');
+            }
+            el.playerTitle.textContent = state.currentTrack.name || 'Unknown';
+            el.playerArtist.textContent = state.currentTrack.artists || '';
+
+            try {
+                el.audio.src = url;
+                await el.audio.play();
+                state.isPlaying = true;
+                el.playIcon.style.display = 'none';
+                el.pauseIcon.style.display = 'block';
+                try { updatePlayerBarVisibility(); } catch (e) {}
+                try { updateOverlayLikeButton(); } catch (e) {}
+                // Add to recent so it shows up in Recents as a played item
+                addToRecent(state.currentTrack);
+            } catch (e) {
+                throw e;
+            }
+        }
+
+        async function isTrackOffline(id) {
+            await initOfflineDB();
+            if (!state.offlineDB) return false;
+            return new Promise((resolve) => {
+                const tx = state.offlineDB.transaction(OFFLINE_STORE, 'readonly');
+                const store = tx.objectStore(OFFLINE_STORE);
+                const p = store.getKey(id);
+                p.onsuccess = () => resolve(!!p.result);
+                p.onerror = () => resolve(false);
+            });
+        }
+
+        async function loadOfflineIndex() {
+            await initOfflineDB();
+            if (!state.offlineDB) { state.offlineTracks = []; return; }
+            return new Promise((resolve, reject) => {
+                const tx = state.offlineDB.transaction(OFFLINE_STORE, 'readonly');
+                const store = tx.objectStore(OFFLINE_STORE);
+                const p = store.getAll();
+                p.onsuccess = () => {
+                    state.offlineTracks = (p.result || []).map(r => ({ id: r.id, name: r.name, artists: r.artists, cover: r.cover, created: r.created }));
+                    try { if (state.currentView === 'downloads') renderDownloadsView(); } catch (e) {}
+                    try { refreshDownloadButtons(); } catch (e) {}
+                    resolve(state.offlineTracks);
+                };
+                p.onerror = () => reject(p.error);
+            });
+        }
+
+        // Update all download button states across the UI to reflect offline index
+        function refreshDownloadButtons() {
+            const offlineIds = new Set((state.offlineTracks || []).map(r => r.id));
+            document.querySelectorAll('.download-btn').forEach(btn => {
+                const id = btn.dataset.id;
+                const svg = btn.querySelector('svg');
+                if (offlineIds.has(id)) {
+                    btn.classList.add('downloaded');
+                    if (svg) svg.setAttribute('fill', 'currentColor');
+                } else {
+                    btn.classList.remove('downloaded');
+                    if (svg) svg.setAttribute('fill', 'none');
+                }
+            });
+        }
+
+        function renderDownloadsView() {
+            const container = document.getElementById('downloadsList');
+            if (!container) return;
+            const tracks = state.offlineTracks || [];
+            if (!tracks.length) {
+                container.innerHTML = '<div class="empty-state"><p>No downloaded songs</p></div>';
+                return;
+            }
+            container.innerHTML = tracks.map((t, i) => `
+                <div class="track-card" data-id="${t.id}">
+                    <img class="track-cover" src="${t.cover || generateMusicIconDataUrl()}">
+                    <div class="track-details">
+                        <div class="track-title">${t.name}</div>
+                        <div class="track-subtitle">${t.artists}</div>
+                    </div>
+                    <div class="track-actions">
+                        <button class="icon-btn play-offline-btn" data-id="${t.id}">Play</button>
+                        <button class="icon-btn remove-offline-btn" data-id="${t.id}">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+
+            container.querySelectorAll('.play-offline-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = btn.dataset.id;
+                    try {
+                        await playOfflineTrack(id);
+                    } catch (err) { console.error(err); alert('Could not play offline file'); }
+                });
+            });
+
+            container.querySelectorAll('.remove-offline-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = btn.dataset.id;
+                    try {
+                        await removeOfflineTrack(id);
+                        renderDownloadsView();
+                    } catch (err) { console.error(err); alert('Could not remove file'); }
+                });
+            });
+        }
+
+        // initialize offline DB index
+        initOfflineDB().then(loadOfflineIndex).catch(e => console.warn('offline init failed', e));
 
         // Return a simple SVG music-note data URL used as a neutral fallback when no cover exists
         function generateMusicIconDataUrl() {
@@ -3513,11 +3826,12 @@
                             <span class="api-name">${source}</span>
                             <span class="api-count">${tracks.length} tracks</span>
                         </div>
-                        <div class="tracks-grid">
+                            <div class="tracks-grid">
                             ${tracks.map((t, i) => {
-                    const globalIndex = state.allTracks.length;
-                    state.allTracks.push(t);
-                    return `
+                                    const globalIndex = state.allTracks.length;
+                                    state.allTracks.push(t);
+                                    const offlineClass = (state.offlineTracks || []).some(r => r.id === t.id) ? 'downloaded' : '';
+                                    return `
                                     <div class="track-card" data-index="${globalIndex}">
                                         <img class="track-cover" src="${t.cover}">
                                         <div class="track-details">
@@ -3525,6 +3839,11 @@
                                             <div class="track-subtitle">${t.artists}</div>
                                         </div>
                                         <div class="track-actions">
+                                                            <button class="icon-btn download-btn ${offlineClass}" data-id="${t.id}" data-index="${globalIndex}" title="Download">
+                                                                <svg fill="${offlineClass ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l4-4m-4 4l-4-4M21 21H3" />
+                                                </svg>
+                                            </button>
                                             <button class="icon-btn like-btn ${isLiked(t.id) ? 'active' : ''}" data-id="${t.id}">
                                                 <svg fill="${isLiked(t.id) ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -3563,6 +3882,30 @@
                     toggleLike(btn.dataset.id);
                 });
             });
+            // download buttons (PWA-only)
+            el.searchResults.querySelectorAll('.download-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    const idx = parseInt(btn.dataset.index);
+                    let track = (state.playlist && state.playlist[idx]) || null;
+                    if ((!track || !track.downloadUrl) && id) track = state.allTracks.find(t => t.id === id) || track;
+                    if (!track) return;
+                    try {
+                        btn.classList.add('downloading');
+                        await saveTrackToOffline(track, { userInitiated: true });
+                        btn.classList.add('downloaded');
+                        const svg = btn.querySelector('svg');
+                        if (svg) svg.setAttribute('fill', 'currentColor');
+                    } catch (err) {
+                        console.error(err);
+                        alert('Download failed');
+                    } finally {
+                        btn.classList.remove('downloading');
+                    }
+                });
+            });
+                
         }
 
         function renderTracks(tracks, container) {
@@ -3571,7 +3914,9 @@
                 return;
             }
 
-            container.innerHTML = tracks.map((t, i) => `
+            container.innerHTML = tracks.map((t, i) => {
+                const offlineClass = (state.offlineTracks || []).some(r => r.id === t.id) ? 'downloaded' : '';
+                return `
                 <div class="track-card" data-index="${i}">
                     <img class="track-cover" src="${t.cover}">
                     <div class="track-details">
@@ -3579,6 +3924,11 @@
                         <div class="track-subtitle">${t.artists}</div>
                     </div>
                     <div class="track-actions">
+                        <button class="icon-btn download-btn ${offlineClass}" data-id="${t.id}" data-index="${i}" title="Download">
+                            <svg fill="${offlineClass ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v12m0 0l4-4m-4 4l-4-4M21 21H3" />
+                            </svg>
+                        </button>
                         <button class="icon-btn like-btn ${isLiked(t.id) ? 'active' : ''}" data-id="${t.id}">
                             <svg fill="${isLiked(t.id) ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -3586,7 +3936,7 @@
                         </button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
 
             container.querySelectorAll('.track-card').forEach(card => {
                 card.addEventListener('click', e => {
@@ -3602,6 +3952,30 @@
                     toggleLike(btn.dataset.id);
                 });
             });
+            // download buttons (PWA-only download flow)
+            container.querySelectorAll('.download-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    const idx = parseInt(btn.dataset.index);
+                    let track = (state.playlist && state.playlist[idx]) || null;
+                    if ((!track || !track.downloadUrl) && id) track = state.allTracks.find(t => t.id === id) || track;
+                    if (!track) return;
+                    try {
+                        btn.classList.add('downloading');
+                        await saveTrackToOffline(track, { userInitiated: true });
+                        btn.classList.add('downloaded');
+                        const svg = btn.querySelector('svg');
+                        if (svg) svg.setAttribute('fill', 'currentColor');
+                    } catch (err) {
+                        console.error(err);
+                        alert('Download failed');
+                    } finally {
+                        btn.classList.remove('downloading');
+                    }
+                });
+            });
+            
         }
 
         function isLiked(id) {
@@ -3705,6 +4079,8 @@
             }
         }
 
+        
+
         async function playTrack(index, skipBroadcast = false) {
             if (index < 0 || index >= state.playlist.length) return;
 
@@ -3712,7 +4088,7 @@
             state.currentTrack = state.playlist[index];
 
             try {
-                const url = state.currentTrack.downloadUrl;
+                let url = state.currentTrack.downloadUrl;
                 el.audio.src = url;
 
                 if (state.currentTrack.cover) {
@@ -3749,11 +4125,13 @@
                 try {
                     // increment today's play count for this track
                     if (state.currentTrack && state.currentTrack.id) {
-                        incrementPlayCount(state.currentTrack);
+                            incrementPlayCount(state.currentTrack);
                         // also increment liked-play counter (global)
                         try { incrementLikedPlayCount(state.currentTrack); } catch (e) {}
                     }
                 } catch (e) { console.warn('incrementPlayCount failed', e); }
+
+                    // (offline playback via IndexedDB removed)
 
                 if (state.blend.active) {
                     updateQueueUI();
@@ -4060,6 +4438,7 @@
                 document.getElementById('searchView').style.display = view === 'search' ? 'block' : 'none';
                 document.getElementById('recentView').style.display = view === 'recent' ? 'block' : 'none';
                 document.getElementById('likedView').style.display = view === 'liked' ? 'block' : 'none';
+                document.getElementById('downloadsView').style.display = view === 'downloads' ? 'block' : 'none';
                 document.getElementById('blendView').style.display = view === 'blend' ? 'block' : 'none';
 
                 if (view === 'recent') {
@@ -4070,6 +4449,8 @@
                     renderTracks(state.likedTracks, el.likedTracks);
                 } else if (view === 'blend') {
                     checkBlendUrl();
+                } else if (view === 'downloads') {
+                    try { renderDownloadsView(); } catch (e) {}
                 } else if (view === 'home') {
                     // render greeting whenever user opens Home
                     try { renderHomeView(); } catch (e) {}
@@ -4089,11 +4470,14 @@
             document.getElementById('searchView').style.display = state.currentView === 'search' ? 'block' : 'none';
             document.getElementById('recentView').style.display = state.currentView === 'recent' ? 'block' : 'none';
             document.getElementById('likedView').style.display = state.currentView === 'liked' ? 'block' : 'none';
+            document.getElementById('downloadsView').style.display = state.currentView === 'downloads' ? 'block' : 'none';
             document.getElementById('blendView').style.display = state.currentView === 'blend' ? 'block' : 'none';
 
             try { if (state.currentView === 'home') renderHomeView(); } catch (e) {}
+            try { if (state.currentView === 'downloads') renderDownloadsView(); } catch (e) {}
             try { updatePlayerBarVisibility(); } catch (e) {}
             try { updateOverlayLikeButton(); } catch (e) {}
+            
         })();
 
         // WebRTC Blend

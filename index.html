@@ -5490,6 +5490,29 @@
             if (playerCoverWrapper) playerCoverWrapper.addEventListener('click', openOverlay);
             if (playerTitleEl) playerTitleEl.addEventListener('click', openOverlay);
 
+            // Click thumbnails across lists to play + open overlay
+            document.addEventListener('click', async (ev) => {
+                try {
+                    const img = ev.target.closest && ev.target.closest('img.track-cover');
+                    if (!img) return;
+                    const card = img.closest('.track-card');
+                    if (!card) return;
+                    // prevent the card's own click handler from firing again
+                    ev.stopPropagation();
+                    const idx = card.dataset.index;
+                    const id = card.dataset.id;
+                    if (typeof idx !== 'undefined' && idx !== null && idx !== '') {
+                        await playTrack(parseInt(idx));
+                    } else if (id) {
+                        // offline/downloaded item
+                        await playOfflineTrack(id);
+                    }
+                    openOverlay();
+                } catch (e) {
+                    console.error('Thumbnail click play failed', e);
+                }
+            });
+
             // overlay close by clicking backdrop
             overlay.addEventListener('click', (e) => { if (e.target === overlay) closeOverlay(); });
             // close button

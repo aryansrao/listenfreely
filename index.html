@@ -2438,18 +2438,23 @@
             .extra-bento-item.tall { grid-row: span 2; grid-column: span 1; }
         }
 
-        /* Now-playing overlay: */
+        /* Now-playing overlay: uses smooth slide-up animation */
         #nowPlayingOverlay {
             position: fixed;
             inset: 0;
-            display: none;
-            align-items: stretch;
-            justify-content: flex-start;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
             z-index: 3000;
-            background: #000; 
+            background: rgba(0,0,0,0);
+            pointer-events: none;
+            transition: background-color 420ms cubic-bezier(.22,1,.36,1);
         }
 
-        #nowPlayingOverlay.active { display: flex; }
+        #nowPlayingOverlay.active {
+            background: rgba(0,0,0,0.92);
+            pointer-events: auto;
+        }
 
         /* overlay-card fills the viewport so the overlay feels like a full-screen player */
         #nowPlayingOverlay .overlay-card {
@@ -2467,6 +2472,12 @@
             justify-content: center;
             flex-direction: row;
             position: relative;
+            transform: translateY(100%);
+            transition: transform 480ms cubic-bezier(.22,1,.36,1);
+        }
+
+        #nowPlayingOverlay.active .overlay-card {
+            transform: translateY(0);
         }
 
         /* close button */

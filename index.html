@@ -4454,37 +4454,157 @@
             }
         });
 
+        // centralised view setter so both nav clicks and swipe transitions use the same logic
+        function setView(view) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            const nav = document.querySelector(`.nav-item[data-view="${view}"]`);
+            if (nav) nav.classList.add('active');
+
+            state.currentView = view;
+
+            document.getElementById('homeView').style.display = view === 'home' ? 'block' : 'none';
+            document.getElementById('searchView').style.display = view === 'search' ? 'block' : 'none';
+            document.getElementById('recentView').style.display = view === 'recent' ? 'block' : 'none';
+            document.getElementById('likedView').style.display = view === 'liked' ? 'block' : 'none';
+            document.getElementById('downloadsView').style.display = view === 'downloads' ? 'block' : 'none';
+            document.getElementById('blendView').style.display = view === 'blend' ? 'block' : 'none';
+
+            if (view === 'recent') {
+                state.playlist = state.recentTracks;
+                renderTracks(state.recentTracks, el.recentTracks);
+            } else if (view === 'liked') {
+                state.playlist = state.likedTracks;
+                renderTracks(state.likedTracks, el.likedTracks);
+            } else if (view === 'downloads') {
+                try { renderDownloadsView(); } catch (e) {}
+            } else if (view === 'blend') {
+                checkBlendUrl();
+            } else if (view === 'home') {
+                try { renderHomeView(); } catch (e) {}
+            }
+        }
+
         document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-
-                const view = item.dataset.view;
-                state.currentView = view;
-
-                document.getElementById('homeView').style.display = view === 'home' ? 'block' : 'none';
-                document.getElementById('searchView').style.display = view === 'search' ? 'block' : 'none';
-                document.getElementById('recentView').style.display = view === 'recent' ? 'block' : 'none';
-                document.getElementById('likedView').style.display = view === 'liked' ? 'block' : 'none';
-                document.getElementById('downloadsView').style.display = view === 'downloads' ? 'block' : 'none';
-                document.getElementById('blendView').style.display = view === 'blend' ? 'block' : 'none';
-
-                if (view === 'recent') {
-                    state.playlist = state.recentTracks;
-                    renderTracks(state.recentTracks, el.recentTracks);
-                } else if (view === 'liked') {
-                    state.playlist = state.likedTracks;
-                    renderTracks(state.likedTracks, el.likedTracks);
-                } else if (view === 'blend') {
-                    checkBlendUrl();
-                } else if (view === 'downloads') {
-                    try { renderDownloadsView(); } catch (e) {}
-                } else if (view === 'home') {
-                    // render greeting whenever user opens Home
-                    try { renderHomeView(); } catch (e) {}
-                }
-            });
+            item.addEventListener('click', () => setView(item.dataset.view));
         });
+
+        // Swipe-to-change-tabs (mobile): detect horizontal swipes on main content
+        const NAV_ORDER = ['home','search','recent','liked','downloads','blend'];
+        let touchStartX = 0, touchStartY = 0, touchStartTime = 0, isTouching = false;
+        const MIN_SWIPE_DISTANCE = 50; // px
+        const MAX_VERTICAL_DELTA = 100; // px
+
+        function getAdjacentView(dir) {
+            const cur = NAV_ORDER.indexOf(state.currentView);
+            if (cur === -1) return null;
+            if (dir === 'left') {
+                return NAV_ORDER[Math.min(NAV_ORDER.length - 1, cur + 1)];
+            } else {
+                return NAV_ORDER[Math.max(0, cur - 1)];
+            }
+        }
+
+        async function slideToView(targetView, direction) {
+            if (!targetView || targetView === state.currentView) return;
+            const fromEl = document.getElementById(state.currentView + 'View');
+            const toEl = document.getElementById(targetView + 'View');
+            const container = document.getElementById('mainContent');
+            if (!fromEl || !toEl || !container) { setView(targetView); return; }
+
+            // save container styles and make it the positioning context
+            const savedContainer = { position: container.style.position || '', overflow: container.style.overflow || '' };
+            container.style.position = container.style.position || 'relative';
+            container.style.overflow = 'hidden';
+
+            // prepare layers (relative to container)
+            const keys = ['position','left','right','top','bottom','zIndex','transition','transform','width','height','display'];
+            const saved = { from: {}, to: {} };
+            keys.forEach(k => { saved.from[k] = fromEl.style[k]; saved.to[k] = toEl.style[k]; });
+
+            // compute container padding so views line up with the visible content area (avoid jumping under header)
+            const cs = getComputedStyle(container);
+            const padTop = parseFloat(cs.paddingTop) || 0;
+            const padBottom = parseFloat(cs.paddingBottom) || 0;
+
+            // position inside the container, respecting container padding
+            fromEl.style.position = toEl.style.position = 'absolute';
+            fromEl.style.left = toEl.style.left = '0';
+            fromEl.style.top = toEl.style.top = padTop + 'px';
+            fromEl.style.bottom = toEl.style.bottom = padBottom + 'px';
+            fromEl.style.width = toEl.style.width = '100%';
+            // ensure the view height fits between the paddings
+            fromEl.style.height = toEl.style.height = `calc(100% - ${padTop + padBottom}px)`;
+            fromEl.style.zIndex = 1;
+            toEl.style.zIndex = 2;
+
+            const fromStart = 'translateX(0)';
+            const toStart = direction === 'left' ? 'translateX(100%)' : 'translateX(-100%)';
+            const fromEnd = direction === 'left' ? 'translateX(-100%)' : 'translateX(100%)';
+
+            fromEl.style.transform = fromStart;
+            toEl.style.transform = toStart;
+            toEl.style.display = 'block';
+
+            // force reflow
+            void toEl.offsetWidth;
+
+            const dur = 420;
+            fromEl.style.transition = toEl.style.transition = `transform ${dur}ms cubic-bezier(.22,1,.36,1)`;
+
+            requestAnimationFrame(() => {
+                fromEl.style.transform = fromEnd;
+                toEl.style.transform = 'translateX(0)';
+            });
+
+            // wait for transition end on toEl
+            function cleanup() {
+                // restore styles for both views
+                keys.forEach(k => { fromEl.style[k] = saved.from[k] || ''; toEl.style[k] = saved.to[k] || ''; });
+                // restore container
+                container.style.position = savedContainer.position;
+                container.style.overflow = savedContainer.overflow;
+                // show only target view
+                setView(targetView);
+                toEl.removeEventListener('transitionend', onEnd);
+            }
+            function onEnd(e) { if (e.target === toEl) cleanup(); }
+            toEl.addEventListener('transitionend', onEnd);
+            // safety timeout
+            setTimeout(() => { try { cleanup(); } catch (e) {} }, dur + 80);
+        }
+
+        const mainEl = document.getElementById('mainContent');
+        if (mainEl && 'ontouchstart' in window) {
+            mainEl.addEventListener('touchstart', (e) => {
+                if (e.touches && e.touches.length === 1) {
+                    isTouching = true;
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    touchStartTime = Date.now();
+                }
+            }, {passive:true});
+
+            mainEl.addEventListener('touchmove', (e) => {
+                if (!isTouching || !e.touches || e.touches.length !== 1) return;
+                // prevent default vertical overscroll only when horizontal intent
+            }, {passive:true});
+
+            mainEl.addEventListener('touchend', (e) => {
+                if (!isTouching) return;
+                isTouching = false;
+                const dx = (e.changedTouches && e.changedTouches[0]) ? (e.changedTouches[0].clientX - touchStartX) : 0;
+                const dy = (e.changedTouches && e.changedTouches[0]) ? (e.changedTouches[0].clientY - touchStartY) : 0;
+                if (Math.abs(dx) > MIN_SWIPE_DISTANCE && Math.abs(dy) < MAX_VERTICAL_DELTA) {
+                    if (dx < 0) {
+                        const next = getAdjacentView('left');
+                        if (next) slideToView(next, 'left');
+                    } else {
+                        const prev = getAdjacentView('right');
+                        if (prev) slideToView(prev, 'right');
+                    }
+                }
+            }, {passive:true});
+        }
 
         // Initialize view on load based on state.currentView
         (function initView() {

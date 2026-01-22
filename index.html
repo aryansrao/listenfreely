@@ -1254,8 +1254,25 @@
 
 
             /* Download button states */
-            .download-btn.downloading svg { transform-origin: 50% 50%; animation: lf-rotate 1s linear infinite; }
-            @keyframes lf-rotate { to { transform: rotate(360deg); } }
+            .download-btn { position: relative; }
+            /* show a small spinner overlay while downloading (keeps original svg hidden) */
+            .download-btn.downloading svg { visibility: hidden; }
+            .download-btn.downloading::after {
+                content: '';
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                width: 16px;
+                height: 16px;
+                margin-left: -8px;
+                margin-top: -8px;
+                border-radius: 50%;
+                border: 2px solid rgba(255,255,255,0.12);
+                border-top-color: #fff;
+                box-sizing: border-box;
+                animation: lf-spin 0.8s linear infinite;
+            }
+            @keyframes lf-spin { to { transform: rotate(360deg); } }
             /* Hide download icon when already downloaded */
             .download-btn.downloaded { display: none; }
             .icon-btn {

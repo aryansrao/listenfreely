@@ -1279,7 +1279,9 @@
             }
             @keyframes lf-spin { to { transform: rotate(360deg); } }
             /* Hide download icon when already downloaded */
-            .download-btn.downloaded { display: none; }
+            .download-btn.downloaded { display: none !important; }
+            /* Ensure downloaded state remains hidden in PWA mode as well */
+            .pwa .download-btn.downloaded { display: none !important; }
             .icon-btn {
                 padding: 6px;
             }
@@ -3502,7 +3504,22 @@
             document.querySelectorAll('.download-btn').forEach(btn => {
                 const id = btn.dataset.id;
                 const svg = btn.querySelector('svg');
-                if (offlineIds.has(id)) {
+                // Hide if exact id matches offline index
+                let isOffline = offlineIds.has(id);
+                // Additionally, try to match by track metadata (name + artists) to cover duplicates across sources
+                if (!isOffline) {
+                    try {
+                        const idx = parseInt(btn.dataset.index);
+                        const track = (!Number.isNaN(idx) && state.playlist && state.playlist[idx]) ? state.playlist[idx] : (state.allTracks || []).find(t => t.id === id);
+                        if (track) {
+                            const name = (track.name || '').trim();
+                            const artists = (track.artists || '').trim();
+                            isOffline = (state.offlineTracks || []).some(r => ((r.name || '').trim() === name && (r.artists || '').trim() === artists));
+                        }
+                    } catch (e) { /* ignore */ }
+                }
+
+                if (isOffline) {
                     btn.classList.add('downloaded');
                     if (svg) svg.setAttribute('fill', 'currentColor');
                 } else {

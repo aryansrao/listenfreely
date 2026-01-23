@@ -1255,6 +1255,11 @@
 
             /* Download button states */
             .download-btn { position: relative; }
+            /* Hide download UI (tab + buttons) by default; only show when running as installed PWA */
+            .nav-item[data-view="downloads"] { display: none !important; }
+            .download-btn { display: none !important; }
+            .pwa .nav-item[data-view="downloads"] { display: flex !important; }
+            .pwa .download-btn { display: inline-flex !important; }
             /* show a small spinner overlay while downloading (keeps original svg hidden) */
             .download-btn.downloading svg { visibility: hidden; }
             .download-btn.downloading::after {
@@ -3798,6 +3803,47 @@
             ,overlayLikeIcon: document.getElementById('overlayLikeIcon')
         };
 
+        // Robust PWA detection and runtime enforcement for showing PWA-only UI
+        function isInPWA() {
+            try {
+                // If the browser explicitly reports browser display-mode, treat as not-PWA
+                if (window.matchMedia) {
+                    const browserMM = window.matchMedia('(display-mode: browser)');
+                    if (browserMM && browserMM.matches) return false;
+                }
+                // Primary reliable PWA indicators: standalone display-mode or iOS navigator.standalone
+                if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+                if (window.navigator && window.navigator.standalone === true) return true; // iOS
+            } catch (e) { /* ignore */ }
+            return false;
+        }
+
+        function updatePwaUI() {
+            try {
+                const isPwa = isInPWA();
+                if (isPwa) document.body.classList.add('pwa'); else document.body.classList.remove('pwa');
+
+                const downloadsNav = document.querySelector('.nav-item[data-view="downloads"]');
+                const downloadBtns = Array.from(document.querySelectorAll('.download-btn'));
+                if (!isPwa) {
+                    if (downloadsNav) downloadsNav.style.display = 'none';
+                    downloadBtns.forEach(b => b.style.display = 'none');
+                } else {
+                    if (downloadsNav) downloadsNav.style.display = '';
+                    downloadBtns.forEach(b => b.style.display = '');
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        // Run on load and on common events that can change display-mode
+        document.addEventListener('DOMContentLoaded', updatePwaUI);
+        window.addEventListener('load', updatePwaUI);
+        window.addEventListener('resize', updatePwaUI);
+        window.addEventListener('orientationchange', updatePwaUI);
+        document.addEventListener('visibilitychange', updatePwaUI);
+        // immediate run in case script executes after DOMContentLoaded
+        updatePwaUI();
+
         // initialize audio.loop according to saved loop state
         try {
             if (el.audio) el.audio.loop = (state.loopState === 'one');
@@ -4489,7 +4535,17 @@
         });
 
         // Swipe-to-change-tabs (mobile): detect horizontal swipes on main content
-        const NAV_ORDER = ['home','search','recent','liked','downloads','blend'];
+        // Build nav order dynamically so PWA-only tabs (downloads) are excluded in regular browser
+        const NAV_ORDER = (() => {
+            const base = ['home','search','recent','liked','blend'];
+            try {
+                if (isInPWA()) {
+                    // insert downloads before blend
+                    base.splice(base.indexOf('blend'), 0, 'downloads');
+                }
+            } catch (e) {}
+            return base;
+        })();
         let touchStartX = 0, touchStartY = 0, touchStartTime = 0, isTouching = false;
         const MIN_SWIPE_DISTANCE = 50; // px
         const MAX_VERTICAL_DELTA = 100; // px
